@@ -97,6 +97,8 @@ void handle_elf(int id, Params params)
     }
   }
 
+  *elfQueue -= 1;
+
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: taking holidays\n", *actionId, id);
   *actionId += 1;
@@ -169,7 +171,6 @@ void handle_santa(Params params)
       sem_wait(elfHelped);
 
       *elfsHelped += 3;
-      *elfQueue -= 3;
 
       sem_wait(writeOutLock);
       fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
@@ -181,6 +182,10 @@ void handle_santa(Params params)
     if (*readyRDCount == params.nr)
     {
       *shopClosed = 1;
+      sem_wait(writeOutLock);
+      fprintf(outputFile, "%d: Santa: closing workshop\n", *actionId);
+      *actionId += 1;
+      sem_post(writeOutLock);
 
       // Release rest of elfs for holidays
       int restOfQueue = params.ne - *elfsHelped;
@@ -189,10 +194,6 @@ void handle_santa(Params params)
         sem_post(elfWaitForHelp);
       }
 
-      sem_wait(writeOutLock);
-      fprintf(outputFile, "%d: Santa: closing workshop\n", *actionId);
-      *actionId += 1;
-      sem_post(writeOutLock);
       break;
     }
   }
