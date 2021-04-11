@@ -3,7 +3,7 @@ CLIST = $(wildcard *.c)
 all: build
 
 build: $(CLIST)
-	gcc -std=gnu99 -Wall -Wextra -Werror -pedantic $(CLIST) -o proj2 -lrt -lpthread
+	gcc -std=gnu99 -Wall -Wextra -Werror -pedantic $(CLIST) -o proj2 -lrt -lpthread -g
 
 .PHONY: run
 run: build

@@ -92,6 +92,7 @@ int main (int argc, char *argv[])
   processCreatorProcess = fork();
   if (processCreatorProcess < 0)
   {
+    printf("[DEBUG] Santa creator fork");
     handleErrors(PROCESS_CREATE_ERROR);
   }
   else if (processCreatorProcess == 0)
@@ -100,6 +101,7 @@ int main (int argc, char *argv[])
 
     if (santa_process < 0)
     {
+      printf("[DEBUG] Santa fork");
       handleErrors(PROCESS_CREATE_ERROR);
     }
     else if (santa_process == 0)
@@ -118,6 +120,7 @@ int main (int argc, char *argv[])
   processCreatorProcess = fork();
   if (processCreatorProcess < 0)
   {
+    printf("[DEBUG] Elves creator fork");
     handleErrors(PROCESS_CREATE_ERROR);
   }
   else if (processCreatorProcess == 0)
@@ -130,6 +133,7 @@ int main (int argc, char *argv[])
 
       if (tmp_proc < 0)
       {
+        printf("[DEBUG] Elves fork");
         handleErrors(PROCESS_CREATE_ERROR);
       }
       else if (tmp_proc == 0)
@@ -154,6 +158,7 @@ int main (int argc, char *argv[])
   processCreatorProcess = fork();
   if (processCreatorProcess < 0)
   {
+    printf("[DEBUG] Raindeer creator fork");
     handleErrors(PROCESS_CREATE_ERROR);
   }
   else if (processCreatorProcess == 0)
@@ -166,6 +171,7 @@ int main (int argc, char *argv[])
 
       if (tmp_proc < 0)
       {
+        printf("[DEBUG] Raindeer fork");
         handleErrors(PROCESS_CREATE_ERROR);
       }
       else if (tmp_proc == 0)
