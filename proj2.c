@@ -19,8 +19,6 @@
 #include "resource_allocation.h"
 #include "error_handling.h"
 
-// #define DEBUG
-
 /**
  * @brief Get values from arguments
  *
@@ -67,8 +65,6 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
  */
 void handle_elf(int id, Params params)
 {
-  (void)params;
-
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: started\n", *actionId, id);
   *actionId += 1;
@@ -84,8 +80,10 @@ void handle_elf(int id, Params params)
     *actionId += 1;
     sem_post(writeOutLock);
 
-    *elfQueue += 1;
-    sem_wait(elfWaitForHelp);
+    sem_wait(waitForHelp);
+    *elfReadyQueue += 1;
+    sem_wait(getHelp);
+    *elfReadyQueue -= 1;
 
     if (!(*shopClosed))
     {
@@ -93,11 +91,18 @@ void handle_elf(int id, Params params)
       fprintf(outputFile, "%d: Elf %d: get help\n", *actionId, id);
       *actionId += 1;
       sem_post(writeOutLock);
+
       sem_post(elfHelped);
+
+      // Signal to 3 next elves that Santa is ready
+      if (*elfReadyQueue == 0)
+      {
+        sem_post(waitForHelp);
+        sem_post(waitForHelp);
+        sem_post(waitForHelp);
+      }
     }
   }
-
-  *elfQueue -= 1;
 
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: taking holidays\n", *actionId, id);
@@ -155,16 +160,16 @@ void handle_santa(Params params)
   while (true)
   {
     // Santa will get woken up and will go help elfs
-    if (*elfQueue >= 3)
+    if (*elfReadyQueue >= 3)
     {
       sem_wait(writeOutLock);
       fprintf(outputFile, "%d: Santa: helping elves\n", *actionId);
       *actionId += 1;
       sem_post(writeOutLock);
 
-      sem_post(elfWaitForHelp);
-      sem_post(elfWaitForHelp);
-      sem_post(elfWaitForHelp);
+      sem_post(getHelp);
+      sem_post(getHelp);
+      sem_post(getHelp);
 
       sem_wait(elfHelped);
       sem_wait(elfHelped);
@@ -191,7 +196,8 @@ void handle_santa(Params params)
       int restOfQueue = params.ne - *elfsHelped;
       for (int i = 0; i < restOfQueue; i++)
       {
-        sem_post(elfWaitForHelp);
+        sem_post(waitForHelp);
+        sem_post(getHelp);
       }
 
       break;
@@ -240,7 +246,7 @@ int main (int argc, char *argv[])
 
   handleErrors(allocateResources());
   *readyRDCount = 0;
-  *elfQueue = 0;
+  *elfReadyQueue = 0;
   *elfsHelped = 0;
   *shopClosed = 0;
   *actionId = 1;

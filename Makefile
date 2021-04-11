@@ -7,7 +7,7 @@ build: $(CLIST)
 
 .PHONY: run
 run:
-	@./proj2 4 3 300 755
+	@./proj2 5 3 300 300
 
 clean:
 	@-rm proj2

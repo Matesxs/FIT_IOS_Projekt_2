@@ -15,14 +15,15 @@ extern pid_t pid_mainprocess;
 extern sem_t *writeOutLock;
 extern sem_t *rdWaitForHitch;
 extern sem_t *rdHitched;
-extern sem_t *elfWaitForHelp;
+extern sem_t *getHelp;
+extern sem_t *waitForHelp;
 extern sem_t *elfHelped;
 
 // Shared memory
 extern int shm_readyRDCount_id;
 extern int *readyRDCount;
-extern int shm_elfQueue_id;
-extern int *elfQueue;
+extern int shm_elfReadyQueue_id;
+extern int *elfReadyQueue;
 extern int shm_elfsHelped_id;
 extern int *elfsHelped;
 extern int shm_shopClosed_id;
