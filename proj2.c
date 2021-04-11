@@ -242,7 +242,7 @@ int main (int argc, char *argv[])
 
   // Split main process
   pid_mainprocess = getpid();
-  srand(time(NULL));
+  srand(time(NULL) * pid_mainprocess);
 
   handleErrors(allocateResources());
   *readyRDCount = 0;

@@ -1,13 +1,13 @@
 CLIST = $(wildcard *.c)
 
-all: build run
+all: build
 
 build: $(CLIST)
 	gcc -std=gnu99 -Wall -Wextra -Werror -pedantic $(CLIST) -o proj2 -lrt -lpthread
 
 .PHONY: run
-run:
-	@./proj2 5 3 300 300
+run: build
+	@./proj2 5 3 600 435
 
 clean:
 	@-rm proj2
