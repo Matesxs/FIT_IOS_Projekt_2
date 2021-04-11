@@ -237,9 +237,8 @@ int main (int argc, char *argv[])
     handleErrors(OF_OPEN_ERROR);
   setbuf(outputFile, NULL);
 
-  pid_t elf_processes[params.ne];
-  pid_t rd_processes[params.nr];
-  pid_t santa_process;
+  pid_t processCreatorProcess;
+  pid_t processHandlers[3];
 
   // Split main process
   pid_mainprocess = getpid();
@@ -252,74 +251,104 @@ int main (int argc, char *argv[])
   *shopClosed = 0;
   *actionId = 1;
 
+  processCreatorProcess = fork();
+  if (processCreatorProcess < 0)
   {
-    pid_t tmp_proc = fork();
+    handleErrors(PROCESS_CREATE_ERROR);
+  }
+  else if (processCreatorProcess == 0)
+  {
+    pid_t santa_process = fork();
 
-    if (tmp_proc < 0)
+    if (santa_process < 0)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
-    else if (tmp_proc == 0)
+    else if (santa_process == 0)
     {
       handle_santa(params);
       exit(0);
     }
-    else
-    {
-      santa_process = tmp_proc;
-    }
+
+    waitpid(santa_process, NULL, 0);
+    exit(0);
   }
 
-  for (int i = 0; i < params.ne; i++)
-  {
-    pid_t tmp_proc = fork();
+  processHandlers[0] = processCreatorProcess;
 
-    if (tmp_proc < 0)
+  processCreatorProcess = fork();
+  if (processCreatorProcess < 0)
+  {
+    handleErrors(PROCESS_CREATE_ERROR);
+  }
+  else if (processCreatorProcess == 0)
+  {
+    pid_t elf_processes[params.ne];
+
+    for (int i = 0; i < params.ne; i++)
     {
-      handleErrors(PROCESS_CREATE_ERROR);
+      pid_t tmp_proc = fork();
+
+      if (tmp_proc < 0)
+      {
+        handleErrors(PROCESS_CREATE_ERROR);
+      }
+      else if (tmp_proc == 0)
+      {
+        handle_elf(i + 1, params);
+        exit(0);
+      }
+      else
+      {
+        elf_processes[i] = tmp_proc;
+      }
     }
-    else if (tmp_proc == 0)
-    {
-      handle_elf(i + 1, params);
-      exit(0);
-    }
-    else
-    {
-      elf_processes[i] = tmp_proc;
-    }
+
+    for (int i = 0; i < params.ne; i++)
+      waitpid(elf_processes[i], NULL, 0);
+    exit(0);
   }
 
-  for (int i = 0; i < params.nr; i++)
-  {
-    pid_t tmp_proc = fork();
+  processHandlers[1] = processCreatorProcess;
 
-    if (tmp_proc < 0)
+  processCreatorProcess = fork();
+  if (processCreatorProcess < 0)
+  {
+    handleErrors(PROCESS_CREATE_ERROR);
+  }
+  else if (processCreatorProcess == 0)
+  {
+    pid_t rd_processes[params.nr];
+
+    for (int i = 0; i < params.nr; i++)
     {
-      handleErrors(PROCESS_CREATE_ERROR);
-    }
-    else if (tmp_proc == 0)
-    {
-      handle_rd(i + 1, params);
-      exit(0);
-    }
-    else
-    {
+      pid_t tmp_proc = fork();
+
+      if (tmp_proc < 0)
+      {
+        handleErrors(PROCESS_CREATE_ERROR);
+      }
+      else if (tmp_proc == 0)
+      {
+        handle_rd(i + 1, params);
+        exit(0);
+      }
+
       rd_processes[i] = tmp_proc;
     }
+
+    for (int i = 0; i < params.nr; i++)
+      waitpid(rd_processes[i], NULL, 0);
+    exit(0);
   }
+
+  processHandlers[2] = processCreatorProcess;
 
   // Wait for all processes to finish
-  for (int i = 0; i < params.ne; i++)
+  for (int i = 0; i < 3; i++)
   {
-    waitpid(elf_processes[i], NULL, 0);
+    waitpid(processHandlers[i], NULL, 0);
   }
-
-  for (int i = 0; i < params.nr; i++)
-  {
-    waitpid(rd_processes[i], NULL, 0);
-  }
-
-  waitpid(santa_process, NULL, 0);
 
   handleErrors(deallocateResources());
 

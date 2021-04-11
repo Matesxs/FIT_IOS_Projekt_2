@@ -13,8 +13,6 @@
 void terminate()
 {
   deallocateResources();
-  kill(pid_mainprocess, SIGTERM);
-  kill(getpid(), SIGTERM);
   exit(1);
 }
 
