@@ -65,6 +65,10 @@ void handleErrors(ReturnCode code)
       fprintf(stderr,"Failed to destroy shared memory\n");
       break;
 
+    case PROCESS_CREATE_ERROR:
+      fprintf(stderr,"Failed to create new process\n");
+      break;
+
     case OF_OPEN_ERROR:
       fprintf(stderr,"Failed to open output file\n");
       break;

@@ -193,6 +193,7 @@ void handle_santa(Params params)
       sem_post(writeOutLock);
 
       // Release rest of elfs for holidays
+      // TODO: Rework to signal
       int restOfQueue = params.ne - *elfsHelped;
       for (int i = 0; i < restOfQueue; i++)
       {
@@ -254,7 +255,11 @@ int main (int argc, char *argv[])
   {
     pid_t tmp_proc = fork();
 
-    if (tmp_proc == 0)
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
     {
       handle_santa(params);
       exit(0);
@@ -269,7 +274,11 @@ int main (int argc, char *argv[])
   {
     pid_t tmp_proc = fork();
 
-    if (tmp_proc == 0)
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
     {
       handle_elf(i + 1, params);
       exit(0);
@@ -284,7 +293,11 @@ int main (int argc, char *argv[])
   {
     pid_t tmp_proc = fork();
 
-    if (tmp_proc == 0)
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
     {
       handle_rd(i + 1, params);
       exit(0);
