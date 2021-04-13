@@ -26,9 +26,9 @@ OBJ = $(patsubst $(SOURCE_FOLDER)/%.$(SUFFIX), $(OBJECT_FOLDER)/%.o, $(SRC))
 
 .PHONY:  all build run clean zip
 
-all: build
+all: docs build
 
-docs:
+docs: $(SRC) $(HDR)
 	doxygen Doxyfile
 
 build: $(BINARY_PATH)
