@@ -50,4 +50,4 @@ clean:
 	@$(RM) $(ADDITIONAL_CLEANU)
 
 zip: clean
-	zip -r packed.zip *
+	zip -r $(BINARY_NAME).zip *
