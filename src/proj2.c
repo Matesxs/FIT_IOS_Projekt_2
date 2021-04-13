@@ -9,11 +9,11 @@
 #include <time.h>
 #include <sys/wait.h>
 
-#include "shared_resources.h"
-#include "static_constructions.h"
-#include "resource_allocation.h"
-#include "error_handling.h"
-#include "process_handlers.h"
+#include "lib/shared_resources.h"
+#include "lib/static_constructions.h"
+#include "lib/resource_allocation.h"
+#include "lib/error_handling.h"
+#include "lib/process_handlers.h"
 
 /**
  * @brief Get values from arguments
@@ -28,16 +28,16 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
   if (argc != 5) return ARGUMENT_COUNT_ERROR;
 
   char *rest = NULL;
-  params->ne = strtol(argv[1], &rest, 10);
+  params->ne = (int)strtol(argv[1], &rest, 10);
   if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->nr = strtol(argv[2], &rest, 10);
+  params->nr = (int)strtol(argv[2], &rest, 10);
   if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->te = strtol(argv[3], &rest, 10);
+  params->te = (int)strtol(argv[3], &rest, 10);
   if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->tr = strtol(argv[4], &rest, 10);
+  params->tr = (int)strtol(argv[4], &rest, 10);
   if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
   if (params->ne < 0 || params->ne > 1000 ||
