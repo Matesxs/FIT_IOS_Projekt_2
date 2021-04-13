@@ -21,31 +21,47 @@ ReturnCode deallocateResources()
     outputFile = NULL;
   }
 
+  ReturnCode retVal = NO_ERROR;
+
   // Destroy semafors
-  if (sem_destroy(writeOutLock) == -1 ||
-      sem_destroy(rdWaitForHitch) == -1 ||
-      sem_destroy(rdHitched) == -1 ||
-      sem_destroy(getHelp) == -1 ||
-      sem_destroy(waitForHelp) == -1 ||
-      sem_destroy(elfHelped) == -1 ||
-      sem_destroy(wakeForHelp) == -1 ||
-      sem_destroy(wakeForHitch) == -1)
-  {
-    return SEMAPHOR_DESTROY_ERROR;
-  }
+  if (sem_destroy(writeOutLock) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(rdWaitForHitch) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(rdHitched) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(getHelp) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(waitForHelp) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(elfHelped) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(wakeForHelp) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(wakeForHitch) == -1)
+    retVal = SEMAPHOR_DESTROY_ERROR;
+  if (retVal != NO_ERROR)
+    return retVal;
 
   // Deallocate shared memory
-  if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1 ||
-      shmdt(readyRDCount) == -1 ||
-      shmctl(shm_elfReadyQueue_id, IPC_RMID, NULL) == -1 ||
-      shmdt(elfReadyQueue) == -1 ||
-      shmctl(shm_shopClosed_id, IPC_RMID, NULL) == -1 ||
-      shmdt(shopClosed) == -1 ||
-      shmctl(shm_actionId_id, IPC_RMID, NULL) == -1 ||
-      shmdt(actionId) == -1)
-  {
-    return SM_DESTROY_ERROR;
-  }
+  if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmctl(shm_elfReadyQueue_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmctl(shm_shopClosed_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmctl(shm_actionId_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmdt(readyRDCount) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmdt(elfReadyQueue) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmdt(shopClosed) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (shmdt(actionId) == -1)
+    retVal = SM_DESTROY_ERROR;
+  if (retVal != NO_ERROR)
+    return retVal;
 
   return NO_ERROR;
 }
