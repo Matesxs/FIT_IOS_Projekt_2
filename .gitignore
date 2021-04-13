@@ -2,3 +2,5 @@ cmake-build-debug/
 *.out
 .idea/
 docs/
+proj2
+obj/
