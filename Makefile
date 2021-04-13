@@ -24,15 +24,6 @@ SRC = $(call rwildcard,$(SOURCE_FOLDER),*.$(SUFFIX))
 HDR = $(call rwildcard,$(SOURCE_FOLDER),*.h)
 OBJ = $(patsubst $(SOURCE_FOLDER)/%.$(SUFFIX), $(OBJECT_FOLDER)/%.o, $(SRC))
 
-.PHONY:  all build run clean zip
-
-all: docs build
-
-docs: $(SRC) $(HDR)
-	doxygen Doxyfile
-
-build: $(BINARY_PATH)
-
 $(BINARY_PATH) : $(OBJ)
 	@echo LINKING
 	@mkdir -p $(@D)
@@ -42,6 +33,15 @@ $(OBJECT_FOLDER)/%.o: %.$(SUFFIX) $(HDR)
 	@echo COMPILING $<
 	@mkdir -p $(@D)
 	@$(CC)  $< -c -o $@ $(CFLAGS)
+
+.PHONY:  all build run clean zip
+
+all: docs build
+
+docs: $(SRC) $(HDR)
+	doxygen Doxyfile
+
+build: $(BINARY_PATH)
 
 clean:
 	@$(RM) $(OBJECT_FOLDER)
