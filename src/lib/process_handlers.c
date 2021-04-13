@@ -22,44 +22,67 @@ void handle_elf(int id, Params params)
   *actionId += 1;
   sem_post(writeOutLock);
 
-  // Work for random amount of time
-  unsigned int work_time = random() % (params.te + 1);
-  usleep(work_time * 1000);
-
-  // If shop is closed go elf dont need help and can take holidays
-  if (!(*shopClosed))
+  while (true)
   {
+    // Work for random amount of time
+    unsigned int work_time = random() % (params.te + 1);
+    usleep(work_time * 1000);
+
+    // If shop is closed go elf dont need help and can take holidays
+    if (*shopClosed) break;
+
     sem_wait(writeOutLock);
     fprintf(outputFile, "%d: Elf %d: need help\n", *actionId, id);
     *actionId += 1;
     sem_post(writeOutLock);
 
     // Wait in queue for empty workshop
-    sem_wait(waitForHelp);
+    bool leave = false;
+
+    while(sem_trywait(waitForHelp) != 0)
+    {
+      if (*shopClosed)
+      {
+        leave = true;
+        break;
+      }
+    }
+
+    if (leave) break;
 
     // Wait for help
     *elfReadyQueue += 1;
-    sem_wait(getHelp);
-    *elfReadyQueue -= 1;
-
-    // If shop is closed already when Santa appears then take holidays
-    if (!(*shopClosed))
+    if (*elfReadyQueue == 3)
     {
-      sem_wait(writeOutLock);
-      fprintf(outputFile, "%d: Elf %d: get help\n", *actionId, id);
-      *actionId += 1;
-      sem_post(writeOutLock);
+      sem_post(wakeForHelp);
+    }
 
-      // Get help from Santa
-      sem_post(elfHelped);
-
-      // Signal to 3 next elves that workshop is free
-      if (*elfReadyQueue == 0)
+    while(sem_trywait(getHelp) != 0)
+    {
+      if (*shopClosed)
       {
-        sem_post(waitForHelp);
-        sem_post(waitForHelp);
-        sem_post(waitForHelp);
+        leave = true;
+        break;
       }
+    }
+
+    *elfReadyQueue -= 1;
+    if (leave) break;
+
+    sem_wait(writeOutLock);
+    fprintf(outputFile, "%d: Elf %d: get help\n", *actionId, id);
+    *actionId += 1;
+    sem_post(writeOutLock);
+
+    // Get help from Santa
+    sem_post(elfHelped);
+
+    // Signal to 3 next elves that workshop is free
+    if (*elfReadyQueue == 0)
+    {
+      sem_post(waitForHelp);
+      sem_post(waitForHelp);
+      sem_post(waitForHelp);
     }
   }
 
@@ -86,7 +109,7 @@ void handle_rd(int id, Params params)
   sem_post(writeOutLock);
 
   // Wait some time before going home
-  unsigned int vac_time = (random() % (params.tr - params.tr / 2 + 1)) + params.tr / 2;
+  unsigned int vac_time = (random() % ((params.tr - params.tr / 2) + 1)) + params.tr / 2;
   usleep(vac_time * 1000);
 
   sem_wait(writeOutLock);
@@ -96,6 +119,9 @@ void handle_rd(int id, Params params)
 
   // Wait for hitch
   *readyRDCount += 1;
+  if (*readyRDCount == params.nr)
+    sem_post(wakeForHitch);
+
   sem_wait(rdWaitForHitch);
 
   sem_wait(writeOutLock);
@@ -122,7 +148,7 @@ void handle_santa(Params params)
   while (true)
   {
     // Santa will get woken up and will go help elfs
-    if (*elfReadyQueue >= 3)
+    if (sem_trywait(wakeForHelp) == 0)
     {
       sem_wait(writeOutLock);
       fprintf(outputFile, "%d: Santa: helping elves\n", *actionId);
@@ -138,8 +164,6 @@ void handle_santa(Params params)
       sem_wait(elfHelped);
       sem_wait(elfHelped);
 
-      *elfsHelped += 3;
-
       sem_wait(writeOutLock);
       fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
       *actionId += 1;
@@ -147,22 +171,13 @@ void handle_santa(Params params)
     }
 
     // All RDs ready for hitching
-    if (*readyRDCount == params.nr)
+    if (sem_trywait(wakeForHitch) == 0)
     {
-      *shopClosed = 1;
       sem_wait(writeOutLock);
       fprintf(outputFile, "%d: Santa: closing workshop\n", *actionId);
       *actionId += 1;
       sem_post(writeOutLock);
-
-      // Release rest of elfs for holidays
-      // TODO: Rework to signal
-      int restOfQueue = params.ne - *elfsHelped;
-      for (int i = 0; i < restOfQueue; i++)
-      {
-        sem_post(waitForHelp);
-        sem_post(getHelp);
-      }
+      *shopClosed = 1;
 
       break;
     }

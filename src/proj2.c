@@ -40,8 +40,8 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
   params->tr = (int)strtol(argv[4], &rest, 10);
   if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  if (params->ne < 0 || params->ne > 1000 ||
-      params->nr < 0 || params->nr > 20 ||
+  if (params->ne <= 0 || params->ne >= 1000 ||
+      params->nr <= 0 || params->nr >= 20 ||
       params->te < 0 || params->te > 1000 ||
       params->tr < 0 || params->tr > 1000)
   {
@@ -74,9 +74,8 @@ int main (int argc, char *argv[])
   pid_t processCreatorProcess;
   pid_t processHandlers[3];
 
-  // Split main process
-  pid_mainprocess = getpid();
-  srand(time(NULL) * pid_mainprocess);
+  // Init random generator
+  srand(time(NULL));
 
   // Allocate shared resources
   handleErrors(allocateResources());
@@ -84,7 +83,6 @@ int main (int argc, char *argv[])
   // Init shared variables
   *readyRDCount = 0;
   *elfReadyQueue = 0;
-  *elfsHelped = 0;
   *shopClosed = 0;
   *actionId = 1;
 

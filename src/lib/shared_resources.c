@@ -15,13 +15,13 @@ sem_t *rdHitched = NULL;
 sem_t *getHelp = NULL;
 sem_t *waitForHelp = NULL;
 sem_t *elfHelped = NULL;
+sem_t *wakeForHelp = NULL;
+sem_t *wakeForHitch = NULL;
 
 int shm_readyRDCount_id = 0;
 int *readyRDCount = NULL;
 int shm_elfReadyQueue_id = 0;
 int *elfReadyQueue = NULL;
-int shm_elfsHelped_id = 0;
-int *elfsHelped = NULL;
 int shm_shopClosed_id = 0;
 int *shopClosed = NULL;
 int shm_actionId_id = 0;

@@ -27,7 +27,9 @@ ReturnCode deallocateResources()
       sem_destroy(rdHitched) == -1 ||
       sem_destroy(getHelp) == -1 ||
       sem_destroy(waitForHelp) == -1 ||
-      sem_destroy(elfHelped) == -1)
+      sem_destroy(elfHelped) == -1 ||
+      sem_destroy(wakeForHelp) == -1 ||
+      sem_destroy(wakeForHitch) == -1)
   {
     return SEMAPHOR_DESTROY_ERROR;
   }
@@ -37,8 +39,6 @@ ReturnCode deallocateResources()
       shmdt(readyRDCount) == -1 ||
       shmctl(shm_elfReadyQueue_id, IPC_RMID, NULL) == -1 ||
       shmdt(elfReadyQueue) == -1 ||
-      shmctl(shm_elfsHelped_id, IPC_RMID, NULL) == -1 ||
-      shmdt(elfsHelped) == -1 ||
       shmctl(shm_shopClosed_id, IPC_RMID, NULL) == -1 ||
       shmdt(shopClosed) == -1 ||
       shmctl(shm_actionId_id, IPC_RMID, NULL) == -1 ||
@@ -63,7 +63,9 @@ ReturnCode allocateResources()
       (rdHitched = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (getHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (waitForHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
-      (elfHelped = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
+      (elfHelped = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
+      (wakeForHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
+      (wakeForHitch = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
   {
     return SEMAPHOR_CREATION_ERROR;
   }
@@ -74,7 +76,9 @@ ReturnCode allocateResources()
       sem_init(rdHitched, 1, 0) == -1 ||
       sem_init(getHelp, 1, 0) == -1 ||
       sem_init(waitForHelp, 1, 3) == -1 ||
-      sem_init(elfHelped, 1, 0) == -1)
+      sem_init(elfHelped, 1, 0) == -1 ||
+      sem_init(wakeForHelp, 1, 0) == -1 ||
+      sem_init(wakeForHitch, 1, 0) == -1)
   {
     return SEMAPHOR_INIT_FAILED;
   }
@@ -82,7 +86,6 @@ ReturnCode allocateResources()
   // Create shared memory
   if ((shm_readyRDCount_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_elfReadyQueue_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
-      (shm_elfsHelped_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_shopClosed_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_actionId_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
   {
@@ -92,7 +95,6 @@ ReturnCode allocateResources()
   // Map shared memory
   if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == NULL ||
       (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == NULL ||
-      (elfsHelped = (int*)shmat(shm_elfsHelped_id, NULL, 0)) == NULL ||
       (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == NULL ||
       (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == NULL)
   {
