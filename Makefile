@@ -35,6 +35,7 @@ $(OBJECT_FOLDER)/%.o: %.$(SUFFIX) $(HDR)
 	@$(CC)  $< -c -o $@ $(CFLAGS)
 
 .PHONY:  all build run clean zip
+.SILENT: docs clean zip
 
 all: docs build
 
@@ -44,10 +45,10 @@ docs: $(SRC) $(HDR)
 build: $(BINARY_PATH)
 
 clean:
-	@$(RM) $(OBJECT_FOLDER)
-	@$(RM) $(BINARY_PATH)
-	@$(RM) packed.zip
-	@$(RM) $(ADDITIONAL_CLEANU)
+	$(RM) $(OBJECT_FOLDER)
+	$(RM) $(BINARY_PATH)
+	$(RM) packed.zip
+	$(RM) $(ADDITIONAL_CLEANU)
 
 zip: clean
 	zip -r $(BINARY_NAME).zip *
