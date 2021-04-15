@@ -8,6 +8,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 #include <sys/wait.h>
 
 #include "lib/shared_resources.h"
@@ -26,20 +27,46 @@
  */
 ReturnCode parseArguments(int argc, char *argv[], Params *params)
 {
-  if (argc != 5) return ARGUMENT_COUNT_ERROR;
-
+  if (argc < 5 || argc > 6) return ARGUMENT_COUNT_ERROR;
   char *rest = NULL;
-  params->ne = (int)strtol(argv[1], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->nr = (int)strtol(argv[2], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+  switch (argc)
+  {
+  case 5:
+    params->pflag = false;
+    params->ne = (int)strtol(argv[1], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->te = (int)strtol(argv[3], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+    params->nr = (int)strtol(argv[2], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-  params->tr = (int)strtol(argv[4], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+    params->te = (int)strtol(argv[3], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+
+    params->tr = (int)strtol(argv[4], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+    break;
+
+  case 6:
+    if (strcmp(argv[1], "-p") != 0) return INVALID_ARGUMENT_ERROR;
+
+    params->pflag = true;
+    params->ne = (int)strtol(argv[2], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+
+    params->nr = (int)strtol(argv[3], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+
+    params->te = (int)strtol(argv[4], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+
+    params->tr = (int)strtol(argv[5], &rest, 10);
+    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
+    break;
+  
+  default:
+    return INVALID_ARGUMENT_ERROR;
+  }
 
   if (params->ne <= 0 || params->ne >= 1000 ||
       params->nr <= 0 || params->nr >= 20 ||
@@ -50,6 +77,47 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
   }
 
   return NO_ERROR;
+}
+
+void addElves()
+{
+  size_t newElvesCount = elves_count + (random() % params.ne) + 1;
+
+  pid_t *tmp = (pid_t*)realloc(elf_processes, newElvesCount * sizeof(pid_t));
+  if (tmp == NULL)
+  {
+    globalElvesReturncode = PID_ALLOCATION_ERROR;
+    return;
+  }
+
+  elf_processes = tmp;
+
+  for (size_t i = elves_count; i < newElvesCount; i++)
+  {
+    pid_t tmp_proc = fork();
+
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
+    {
+      handle_elf(i + 1, params);
+      exit(0);
+    }
+    else
+    {
+      elf_processes[i] = tmp_proc;
+    }
+  }
+
+  elves_count = newElvesCount;
+}
+
+void handleUsrSignal()
+{
+  if (processHandlers[1] != 0)
+    kill(processHandlers[1], SIGUSR1);
 }
 
 /**
@@ -63,10 +131,12 @@ int main (int argc, char *argv[])
 {
   pid_mainprocess = getpid();
 
-  Params params;
   handleErrors(parseArguments(argc, argv, &params));
 
+  signal(SIGUSR1, handleUsrSignal);
   signal(SIGQUIT, terminate);
+  signal(SIGINT, terminate);
+  signal(SIGTERM, terminate);
 
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
@@ -74,7 +144,6 @@ int main (int argc, char *argv[])
 
   // Create holder for process creators
   pid_t processCreatorProcess;
-  pid_t processHandlers[3];
 
   // Init random generator
   srand(time(NULL) * getpid());
@@ -87,6 +156,7 @@ int main (int argc, char *argv[])
   *elfReadyQueue = 0;
   *shopClosed = 0;
   *actionId = 1;
+  *christmasStarted = 0;
 
   // Create Santa process
   processCreatorProcess = fork();
@@ -125,9 +195,16 @@ int main (int argc, char *argv[])
   }
   else if (processCreatorProcess == 0)
   {
-    pid_t elf_processes[params.ne];
+    signal(SIGUSR1, SIG_IGN);
 
-    for (int i = 0; i < params.ne; i++)
+    elf_processes = (pid_t*)malloc(sizeof(pid_t) * params.ne);
+    if (elf_processes == NULL)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    elves_count = params.ne;
+
+    for (size_t i = 0; i < elves_count; i++)
     {
       pid_t tmp_proc = fork();
 
@@ -147,8 +224,33 @@ int main (int argc, char *argv[])
       }
     }
 
-    for (size_t i = 0; i < (sizeof(elf_processes) / sizeof(elf_processes[0])); i++)
+    // If there is pflag
+    if (params.pflag)
+    {
+      // Add handler for usr signal 1
+      signal(SIGUSR1, addElves);
+
+      // Wait for signals before waiting for elves
+      while (true)
+      {
+        if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
+        if (*christmasStarted) break;
+      }
+
+      // Remove handler for usr signal 1
+      signal(SIGUSR1, SIG_IGN);
+      if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
+    }
+
+    for (size_t i = 0; i < elves_count; i++)
       waitpid(elf_processes[i], NULL, 0);
+
+    if (elf_processes != NULL)
+    {
+      free(elf_processes);
+      elf_processes = NULL;
+      elves_count = 0;
+    }
     exit(0);
   }
 
@@ -189,6 +291,11 @@ int main (int argc, char *argv[])
   }
 
   processHandlers[2] = processCreatorProcess;
+
+  usleep(1000);
+  kill(pid_mainprocess, SIGUSR1);
+  usleep(3000);
+  kill(pid_mainprocess, SIGUSR1);
 
   // Wait for all processes to finish
   for (int i = 0; i < 3; i++)

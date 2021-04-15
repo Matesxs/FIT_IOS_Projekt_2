@@ -7,13 +7,16 @@
 
 #include "error_handling.h"
 
+bool killSend = false;
+
 /**
  * @brief Deallocate all used memory, kill processes and exit
  */
 void terminate()
 {
-  if (getpid() == pid_mainprocess)
-    deallocateResources();
+  deallocateResources();
+  kill(pid_mainprocess, SIGQUIT);
+  kill(getpid(), SIGQUIT);
   exit(1);
 }
 
@@ -72,7 +75,12 @@ void handleErrors(ReturnCode code)
       fprintf(stderr,"Failed to open output file\n");
       break;
 
+    case PID_ALLOCATION_ERROR:
+      fprintf(stderr,"Failed to allocate memory for pid arrays\n");
+      break;
+
     case UNEXPECTED_ERROR:
+    default:
       fprintf(stderr,"Unexpected error\n");
       break;
   }

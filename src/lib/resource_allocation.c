@@ -22,6 +22,12 @@ ReturnCode deallocateResources()
     outputFile = NULL;
   }
 
+  if (elf_processes != NULL)
+  {
+    free(elf_processes);
+    elf_processes = NULL;
+  }
+
   ReturnCode retVal = NO_ERROR;
 
   // Destroy semafors
@@ -53,6 +59,8 @@ ReturnCode deallocateResources()
     retVal = SM_DESTROY_ERROR;
   if (shmctl(shm_actionId_id, IPC_RMID, NULL) == -1)
     retVal = SM_DESTROY_ERROR;
+  if (shmctl(shm_christmasStarted_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
   if (shmdt(readyRDCount) == -1)
     retVal = SM_DESTROY_ERROR;
   if (shmdt(elfReadyQueue) == -1)
@@ -61,6 +69,9 @@ ReturnCode deallocateResources()
     retVal = SM_DESTROY_ERROR;
   if (shmdt(actionId) == -1)
     retVal = SM_DESTROY_ERROR;
+  if (shmdt(christmasStarted) == -1)
+    retVal = SM_DESTROY_ERROR;
+
   if (retVal != NO_ERROR)
     return retVal;
 
@@ -104,7 +115,8 @@ ReturnCode allocateResources()
   if ((shm_readyRDCount_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_elfReadyQueue_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_shopClosed_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
-      (shm_actionId_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
+      (shm_actionId_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
+      (shm_christmasStarted_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
   {
     return SM_CREATE_ERROR;
   }
@@ -113,7 +125,8 @@ ReturnCode allocateResources()
   if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == NULL ||
       (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == NULL ||
       (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == NULL ||
-      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == NULL)
+      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == NULL ||
+      (christmasStarted = (int*)shmat(shm_christmasStarted_id, NULL, 0)) == NULL)
   {
     return SM_MAP_ERROR;
   }

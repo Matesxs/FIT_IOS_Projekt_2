@@ -194,4 +194,5 @@ void handle_santa(Params params)
   fprintf(outputFile, "%d: Santa: Christmas started\n", *actionId);
   *actionId += 1;
   sem_post(writeOutLock);
+  *christmasStarted = 1;
 }

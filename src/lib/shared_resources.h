@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <semaphore.h>
 
+#include "static_constructions.h"
+
 // Semaphors
 extern sem_t *writeOutLock;
 extern sem_t *rdWaitForHitch;
@@ -27,9 +29,18 @@ extern int shm_shopClosed_id;
 extern int *shopClosed;
 extern int shm_actionId_id;
 extern int *actionId;
+extern int shm_christmasStarted_id;
+extern int *christmasStarted;
 
 // Mic
+extern Params params;
 extern FILE *outputFile;
+
 extern pid_t pid_mainprocess;
+
+extern pid_t *elf_processes;
+extern size_t elves_count;
+extern ReturnCode globalElvesReturncode;
+extern pid_t processHandlers[3];
 
 #endif //IOS_PROJECT2_SHARED_RESOURCES_H
