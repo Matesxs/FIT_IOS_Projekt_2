@@ -79,6 +79,11 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
   return NO_ERROR;
 }
 
+/**
+ * @brief Add random number of elves
+ * 
+ * Generate random number of new elves based on NE argument to help with work when called
+ */
 void addElves()
 {
   size_t newElvesCount = elves_count + (random() % params.ne) + 1;
@@ -114,6 +119,9 @@ void addElves()
   elves_count = newElvesCount;
 }
 
+/**
+ * @brief Forward USR1 signal to elves creator process
+ */
 void handleUsrSignal()
 {
   if (processHandlers[1] != 0)
@@ -291,11 +299,6 @@ int main (int argc, char *argv[])
   }
 
   processHandlers[2] = processCreatorProcess;
-
-  usleep(1000);
-  kill(pid_mainprocess, SIGUSR1);
-  usleep(3000);
-  kill(pid_mainprocess, SIGUSR1);
 
   // Wait for all processes to finish
   for (int i = 0; i < 3; i++)

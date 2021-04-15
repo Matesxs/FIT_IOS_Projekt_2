@@ -8,6 +8,8 @@
 #define _GNU_SOURCE
 #include "resource_allocation.h"
 
+#define SEM_ERR (void*)-1
+
 /**
  * @brief Deallocates all memory used by semaphores and shared memory
  *
@@ -122,11 +124,11 @@ ReturnCode allocateResources()
   }
 
   // Map shared memory
-  if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == NULL ||
-      (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == NULL ||
-      (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == NULL ||
-      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == NULL ||
-      (christmasStarted = (int*)shmat(shm_christmasStarted_id, NULL, 0)) == NULL)
+  if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == SEM_ERR ||
+      (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == SEM_ERR ||
+      (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == SEM_ERR ||
+      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == SEM_ERR ||
+      (christmasStarted = (int*)shmat(shm_christmasStarted_id, NULL, 0)) == SEM_ERR)
   {
     return SM_MAP_ERROR;
   }
