@@ -147,7 +147,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    for (size_t i = 0; i < (sizeof(elf_processes) / sizeof(elf_processes[0])); i++)
+    for (size_t i = 0; i < params.ne; i++)
       waitpid(elf_processes[i], NULL, 0);
     exit(0);
   }
