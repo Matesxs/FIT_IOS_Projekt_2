@@ -60,11 +60,12 @@ ReturnCode parseArguments(int argc, char *argv[], Params *params)
  */
 int main (int argc, char *argv[])
 {
+  pid_mainprocess = getpid();
+
   Params params;
   handleErrors(parseArguments(argc, argv, &params));
 
-  signal(SIGTERM, terminate);
-  signal(SIGINT, terminate);
+  signal(SIGQUIT, terminate);
 
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
@@ -75,7 +76,7 @@ int main (int argc, char *argv[])
   pid_t processHandlers[3];
 
   // Init random generator
-  srand(time(NULL));
+  srand(time(NULL) * getpid());
 
   // Allocate shared resources
   handleErrors(allocateResources());
@@ -145,7 +146,7 @@ int main (int argc, char *argv[])
       }
     }
 
-    for (int i = 0; i < params.ne; i++)
+    for (size_t i = 0; i < (sizeof(elf_processes) / sizeof(elf_processes[0])); i++)
       waitpid(elf_processes[i], NULL, 0);
     exit(0);
   }

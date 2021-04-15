@@ -30,5 +30,6 @@ extern int *actionId;
 
 // Mic
 extern FILE *outputFile;
+extern pid_t pid_mainprocess;
 
 #endif //IOS_PROJECT2_SHARED_RESOURCES_H

@@ -12,6 +12,7 @@
 
 #include "static_constructions.h"
 #include "resource_allocation.h"
+#include "shared_resources.h"
 
 void terminate();
 void handleErrors(ReturnCode code);

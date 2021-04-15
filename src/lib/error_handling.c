@@ -12,7 +12,8 @@
  */
 void terminate()
 {
-  deallocateResources();
+  if (getpid() == pid_mainprocess)
+    deallocateResources();
   exit(1);
 }
 
