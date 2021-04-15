@@ -8,6 +8,46 @@
 #include "process_handlers.h"
 
 /**
+ * @brief Add random number of elves
+ * 
+ * Generate random number of new elves based on NE argument to help with work when called
+ */
+void addElves()
+{
+  size_t newElvesCount = elves_count + (random() % params.ne) + 1;
+
+  pid_t *tmp = (pid_t*)realloc(elf_processes, newElvesCount * sizeof(pid_t));
+  if (tmp == NULL)
+  {
+    globalElvesReturncode = PID_ALLOCATION_ERROR;
+    return;
+  }
+
+  elf_processes = tmp;
+
+  for (size_t i = elves_count; i < newElvesCount; i++)
+  {
+    pid_t tmp_proc = fork();
+
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
+    {
+      handle_elf(i + 1, params);
+      exit(0);
+    }
+    else
+    {
+      elf_processes[i] = tmp_proc;
+    }
+  }
+
+  elves_count = newElvesCount;
+}
+
+/**
  * @brief Handler for elf processes
  *
  * Solves elves work and comunicate with Santa

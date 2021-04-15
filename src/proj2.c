@@ -6,127 +6,16 @@
  */
 
 #define _GNU_SOURCE
+#include <signal.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <time.h>
-#include <string.h>
-#include <sys/wait.h>
 
-#include "lib/shared_resources.h"
 #include "lib/static_constructions.h"
 #include "lib/resource_allocation.h"
 #include "lib/error_handling.h"
 #include "lib/process_handlers.h"
-
-/**
- * @brief Get values from arguments
- *
- * @param argc length of argument array
- * @param argv array of arguments
- * @param params pointer to Params class that will contain extracted values
- * @return ReturnCode with NO_ERROR if it was successful or error code
- */
-ReturnCode parseArguments(int argc, char *argv[], Params *params)
-{
-  if (argc < 5 || argc > 6) return ARGUMENT_COUNT_ERROR;
-  char *rest = NULL;
-
-  switch (argc)
-  {
-  case 5:
-    params->pflag = false;
-    params->ne = (int)strtol(argv[1], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->nr = (int)strtol(argv[2], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->te = (int)strtol(argv[3], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->tr = (int)strtol(argv[4], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-    break;
-
-  case 6:
-    if (strcmp(argv[1], "-p") != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->pflag = true;
-    params->ne = (int)strtol(argv[2], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->nr = (int)strtol(argv[3], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->te = (int)strtol(argv[4], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params->tr = (int)strtol(argv[5], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-    break;
-  
-  default:
-    return INVALID_ARGUMENT_ERROR;
-  }
-
-  if (params->ne <= 0 || params->ne >= 1000 ||
-      params->nr <= 0 || params->nr >= 20 ||
-      params->te < 0 || params->te > 1000 ||
-      params->tr < 0 || params->tr > 1000)
-  {
-    return ARGUMENT_OUT_OF_RANGE;
-  }
-
-  return NO_ERROR;
-}
-
-/**
- * @brief Add random number of elves
- * 
- * Generate random number of new elves based on NE argument to help with work when called
- */
-void addElves()
-{
-  size_t newElvesCount = elves_count + (random() % params.ne) + 1;
-
-  pid_t *tmp = (pid_t*)realloc(elf_processes, newElvesCount * sizeof(pid_t));
-  if (tmp == NULL)
-  {
-    globalElvesReturncode = PID_ALLOCATION_ERROR;
-    return;
-  }
-
-  elf_processes = tmp;
-
-  for (size_t i = elves_count; i < newElvesCount; i++)
-  {
-    pid_t tmp_proc = fork();
-
-    if (tmp_proc < 0)
-    {
-      handleErrors(PROCESS_CREATE_ERROR);
-    }
-    else if (tmp_proc == 0)
-    {
-      handle_elf(i + 1, params);
-      exit(0);
-    }
-    else
-    {
-      elf_processes[i] = tmp_proc;
-    }
-  }
-
-  elves_count = newElvesCount;
-}
-
-/**
- * @brief Forward USR1 signal to elves creator process
- */
-void handleUsrSignal()
-{
-  if (processHandlers[1] != 0)
-    kill(processHandlers[1], SIGUSR1);
-}
+#include "lib/utils.h"
 
 /**
  * @brief Entrypoint of program
@@ -139,7 +28,7 @@ int main (int argc, char *argv[])
 {
   pid_mainprocess = getpid();
 
-  handleErrors(parseArguments(argc, argv, &params));
+  handleErrors(parseArguments(argc, argv));
 
   signal(SIGUSR1, handleUsrSignal);
   signal(SIGQUIT, terminate);
