@@ -12,8 +12,9 @@
  */
 void terminate()
 {
-  if (getpid() == pid_mainprocess)
-    deallocateResources();
+  deallocateResources();
+  kill(pid_mainprocess, SIGQUIT);
+  kill(getpid(), SIGQUIT);
   exit(1);
 }
 
