@@ -67,6 +67,8 @@ int main (int argc, char *argv[])
   handleErrors(parseArguments(argc, argv, &params));
 
   signal(SIGQUIT, terminate);
+  signal(SIGINT, terminate);
+  signal(SIGTERM, terminate);
 
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
