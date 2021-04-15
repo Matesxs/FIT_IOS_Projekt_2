@@ -5,6 +5,7 @@
  * @brief Entry point for Santa Claus problem solver
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <time.h>
 #include <sys/wait.h>

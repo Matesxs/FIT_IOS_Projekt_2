@@ -5,6 +5,7 @@
  * @brief Handle allocating resources for comunication between processes
  */
 
+#define _GNU_SOURCE
 #include "resource_allocation.h"
 
 /**
