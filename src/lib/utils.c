@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-#include "utils.h"
-
-/**
-=======
 /**
  * @file utility.c
  * @author Martin Douša
@@ -24,7 +19,6 @@ void initSignals()
 }
 
 /**
->>>>>>> 25f1e65be579c361d82efda2a9384e6efd549219
  * @brief Get values from arguments
  *
  * @param argc length of argument array
@@ -33,22 +27,6 @@ void initSignals()
  */
 ReturnCode parseArguments(int argc, char *argv[])
 {
-<<<<<<< HEAD
-  if (argc != 5) return ARGUMENT_COUNT_ERROR;
-
-  char *rest = NULL;
-  params.ne = (int)strtol(argv[1], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-  params.nr = (int)strtol(argv[2], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-  params.te = (int)strtol(argv[3], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-  params.tr = (int)strtol(argv[4], &rest, 10);
-  if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-=======
   char *rest = NULL;
   size_t startIndex = 1;
 
@@ -79,7 +57,6 @@ ReturnCode parseArguments(int argc, char *argv[])
   {
     return ARGUMENT_COUNT_ERROR;
   }
->>>>>>> 25f1e65be579c361d82efda2a9384e6efd549219
 
   if (params.ne <= 0 || params.ne >= 1000 ||
       params.nr <= 0 || params.nr >= 20 ||
@@ -92,13 +69,6 @@ ReturnCode parseArguments(int argc, char *argv[])
   return NO_ERROR;
 }
 
-<<<<<<< HEAD
-void initSignals()
-{
-  signal(SIGQUIT, terminate);
-  signal(SIGINT, terminate);
-  signal(SIGTERM, terminate);
-=======
 /**
  * @brief Forward USR1 signal to elves creator process
  */
@@ -106,5 +76,4 @@ void handleUsrSignal()
 {
   if (processHandlers[1] != 0)
     kill(processHandlers[1], SIGUSR1);
->>>>>>> 25f1e65be579c361d82efda2a9384e6efd549219
 }

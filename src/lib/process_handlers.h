@@ -15,10 +15,7 @@
 #include "shared_resources.h"
 #include "error_handling.h"
 
-<<<<<<< HEAD
-=======
 void addElves();
->>>>>>> 25f1e65be579c361d82efda2a9384e6efd549219
 void handle_elf(int id);
 void handle_rd(int id);
 void handle_santa();
