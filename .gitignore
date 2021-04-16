@@ -4,3 +4,4 @@ cmake-build-debug/
 docs/
 proj2
 obj/
+.vscode/
