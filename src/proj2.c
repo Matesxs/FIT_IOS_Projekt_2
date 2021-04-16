@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     }
     else if (santa_process == 0)
     {
-      handle_santa(params);
+      handle_santa();
       exit(0);
     }
 
@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
       }
       else if (tmp_proc == 0)
       {
-        handle_elf(i + 1, params);
+        handle_elf(i + 1);
         exit(0);
       }
       else
@@ -172,7 +172,7 @@ int main (int argc, char *argv[])
       }
       else if (tmp_proc == 0)
       {
-        handle_rd(i + 1, params);
+        handle_rd(i + 1);
         exit(0);
       }
 

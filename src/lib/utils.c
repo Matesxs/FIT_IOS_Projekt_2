@@ -7,6 +7,9 @@
 
 #include "utils.h"
 
+/**
+ * @brief Initialize pandlers for signals
+ */
 void initSignals()
 {
   signal(SIGUSR1, handleUsrSignal);
@@ -20,7 +23,6 @@ void initSignals()
  *
  * @param argc length of argument array
  * @param argv array of arguments
- * @param params pointer to Params class that will contain extracted values
  * @return ReturnCode with NO_ERROR if it was successful or error code
  */
 ReturnCode parseArguments(int argc, char *argv[])
