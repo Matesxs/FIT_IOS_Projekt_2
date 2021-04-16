@@ -7,6 +7,14 @@
 
 #include "utils.h"
 
+void initSignals()
+{
+  signal(SIGUSR1, handleUsrSignal);
+  signal(SIGQUIT, terminate);
+  signal(SIGINT, terminate);
+  signal(SIGTERM, terminate);
+}
+
 /**
  * @brief Get values from arguments
  *
@@ -17,45 +25,35 @@
  */
 ReturnCode parseArguments(int argc, char *argv[])
 {
-  if (argc < 5 || argc > 6) return ARGUMENT_COUNT_ERROR;
   char *rest = NULL;
+  size_t startIndex = 1;
 
-  switch (argc)
+  if (argc == 5 || argc == 6)
   {
-  case 5:
     params.pflag = false;
-    params.ne = (int)strtol(argv[1], &rest, 10);
+
+    if (argc == 6)
+    {
+      startIndex += 1;
+      if (strcmp(argv[1], "-p") != 0) return INVALID_ARGUMENT_ERROR;
+      params.pflag = true;
+    }
+
+    params.ne = (int)strtol(argv[startIndex], &rest, 10);
     if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-    params.nr = (int)strtol(argv[2], &rest, 10);
+    params.nr = (int)strtol(argv[startIndex + 1], &rest, 10);
     if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-    params.te = (int)strtol(argv[3], &rest, 10);
+    params.te = (int)strtol(argv[startIndex + 2], &rest, 10);
     if (*rest != 0) return INVALID_ARGUMENT_ERROR;
 
-    params.tr = (int)strtol(argv[4], &rest, 10);
+    params.tr = (int)strtol(argv[startIndex + 3], &rest, 10);
     if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-    break;
-
-  case 6:
-    if (strcmp(argv[1], "-p") != 0) return INVALID_ARGUMENT_ERROR;
-
-    params.pflag = true;
-    params.ne = (int)strtol(argv[2], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params.nr = (int)strtol(argv[3], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params.te = (int)strtol(argv[4], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-
-    params.tr = (int)strtol(argv[5], &rest, 10);
-    if (*rest != 0) return INVALID_ARGUMENT_ERROR;
-    break;
-  
-  default:
-    return INVALID_ARGUMENT_ERROR;
+  }
+  else
+  {
+    return ARGUMENT_COUNT_ERROR;
   }
 
   if (params.ne <= 0 || params.ne >= 1000 ||

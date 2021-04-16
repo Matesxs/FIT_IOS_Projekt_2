@@ -6,6 +6,7 @@
  */
 
 #define _GNU_SOURCE
+
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
@@ -26,14 +27,10 @@
  */
 int main (int argc, char *argv[])
 {
+  initSignals();
   pid_mainprocess = getpid();
 
   handleErrors(parseArguments(argc, argv));
-
-  signal(SIGUSR1, handleUsrSignal);
-  signal(SIGQUIT, terminate);
-  signal(SIGINT, terminate);
-  signal(SIGTERM, terminate);
 
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
