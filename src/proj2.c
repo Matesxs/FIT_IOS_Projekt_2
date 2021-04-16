@@ -6,11 +6,12 @@
  */
 
 #define _GNU_SOURCE
+
+#include <signal.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <time.h>
-#include <sys/wait.h>
 
-#include "lib/shared_resources.h"
 #include "lib/static_constructions.h"
 #include "lib/resource_allocation.h"
 #include "lib/error_handling.h"
@@ -26,11 +27,10 @@
  */
 int main (int argc, char *argv[])
 {
+  initSignals();
   pid_mainprocess = getpid();
 
   handleErrors(parseArguments(argc, argv));
-
-  initSignals();
 
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
@@ -38,7 +38,6 @@ int main (int argc, char *argv[])
 
   // Create holder for process creators
   pid_t processCreatorProcess;
-  pid_t processHandlers[3];
 
   // Init random generator
   srand(time(NULL) * getpid());
@@ -51,6 +50,7 @@ int main (int argc, char *argv[])
   *elfReadyQueue = 0;
   *shopClosed = 0;
   *actionId = 1;
+  *christmasStarted = 0;
 
   // Create Santa process
   processCreatorProcess = fork();
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     }
     else if (santa_process == 0)
     {
-      handle_santa(params);
+      handle_santa();
       exit(0);
     }
 
@@ -89,9 +89,16 @@ int main (int argc, char *argv[])
   }
   else if (processCreatorProcess == 0)
   {
-    pid_t elf_processes[params.ne];
+    signal(SIGUSR1, SIG_IGN);
 
-    for (int i = 0; i < params.ne; i++)
+    elf_processes = (pid_t*)malloc(sizeof(pid_t) * params.ne);
+    if (elf_processes == NULL)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    elves_count = params.ne;
+
+    for (size_t i = 0; i < elves_count; i++)
     {
       pid_t tmp_proc = fork();
 
@@ -111,8 +118,33 @@ int main (int argc, char *argv[])
       }
     }
 
-    for (size_t i = 0; i < params.ne; i++)
+    // If there is pflag
+    if (params.pflag)
+    {
+      // Add handler for usr signal 1
+      signal(SIGUSR1, addElves);
+
+      // Wait for signals before waiting for elves
+      while (true)
+      {
+        if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
+        if (*christmasStarted) break;
+      }
+
+      // Remove handler for usr signal 1
+      signal(SIGUSR1, SIG_IGN);
+      if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
+    }
+
+    for (size_t i = 0; i < elves_count; i++)
       waitpid(elf_processes[i], NULL, 0);
+
+    if (elf_processes != NULL)
+    {
+      free(elf_processes);
+      elf_processes = NULL;
+      elves_count = 0;
+    }
     exit(0);
   }
 

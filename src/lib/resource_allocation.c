@@ -8,6 +8,8 @@
 #define _GNU_SOURCE
 #include "resource_allocation.h"
 
+#define SEM_ERR (void*)-1
+
 /**
  * @brief Deallocates all memory used by semaphores and shared memory
  *
@@ -20,6 +22,12 @@ ReturnCode deallocateResources()
   {
     fclose(outputFile);
     outputFile = NULL;
+  }
+
+  if (elf_processes != NULL)
+  {
+    free(elf_processes);
+    elf_processes = NULL;
   }
 
   ReturnCode retVal = NO_ERROR;
@@ -53,6 +61,8 @@ ReturnCode deallocateResources()
     retVal = SM_DESTROY_ERROR;
   if (shmctl(shm_actionId_id, IPC_RMID, NULL) == -1)
     retVal = SM_DESTROY_ERROR;
+  if (shmctl(shm_christmasStarted_id, IPC_RMID, NULL) == -1)
+    retVal = SM_DESTROY_ERROR;
   if (shmdt(readyRDCount) == -1)
     retVal = SM_DESTROY_ERROR;
   if (shmdt(elfReadyQueue) == -1)
@@ -61,6 +71,9 @@ ReturnCode deallocateResources()
     retVal = SM_DESTROY_ERROR;
   if (shmdt(actionId) == -1)
     retVal = SM_DESTROY_ERROR;
+  if (shmdt(christmasStarted) == -1)
+    retVal = SM_DESTROY_ERROR;
+
   if (retVal != NO_ERROR)
     return retVal;
 
@@ -104,16 +117,18 @@ ReturnCode allocateResources()
   if ((shm_readyRDCount_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_elfReadyQueue_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
       (shm_shopClosed_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
-      (shm_actionId_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
+      (shm_actionId_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1 ||
+      (shm_christmasStarted_id = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
   {
     return SM_CREATE_ERROR;
   }
 
   // Map shared memory
-  if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == NULL ||
-      (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == NULL ||
-      (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == NULL ||
-      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == NULL)
+  if ((readyRDCount = (int*)shmat(shm_readyRDCount_id, NULL, 0)) == SEM_ERR ||
+      (elfReadyQueue = (int*)shmat(shm_elfReadyQueue_id, NULL, 0)) == SEM_ERR ||
+      (shopClosed = (int*)shmat(shm_shopClosed_id, NULL, 0)) == SEM_ERR ||
+      (actionId = (int*)shmat(shm_actionId_id, NULL, 0)) == SEM_ERR ||
+      (christmasStarted = (int*)shmat(shm_christmasStarted_id, NULL, 0)) == SEM_ERR)
   {
     return SM_MAP_ERROR;
   }
