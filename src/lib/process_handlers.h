@@ -14,8 +14,8 @@
 #include "static_constructions.h"
 #include "shared_resources.h"
 
-void handle_elf(int id, Params params);
-void handle_rd(int id, Params params);
-void handle_santa(Params params);
+void handle_elf(int id);
+void handle_rd(int id);
+void handle_santa();
 
 #endif //IOS_PROJECT2_PROCESS_HANDLERS_H

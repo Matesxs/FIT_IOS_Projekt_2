@@ -15,7 +15,7 @@
  * @param id id of elf
  * @param params loaded params from argument
  */
-void handle_elf(int id, Params params)
+void handle_elf(int id)
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: started\n", *actionId, id);
@@ -101,7 +101,7 @@ void handle_elf(int id, Params params)
  * @param id id of raindeer
  * @param params loaded params from argument
  */
-void handle_rd(int id, Params params)
+void handle_rd(int id)
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: RD %d: started\n", *actionId, id);
@@ -138,7 +138,7 @@ void handle_rd(int id, Params params)
  *
  * @param params loaded params from argument
  */
-void handle_santa(Params params)
+void handle_santa()
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
