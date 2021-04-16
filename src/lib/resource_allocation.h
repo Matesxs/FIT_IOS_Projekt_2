@@ -11,6 +11,7 @@
 #include <sys/shm.h>
 #include <semaphore.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 
 #include "shared_resources.h"
 

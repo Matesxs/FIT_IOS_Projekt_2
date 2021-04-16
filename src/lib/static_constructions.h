@@ -8,6 +8,8 @@
 #ifndef IOS_PROJECT2_STATIC_CONSTRUCTIONS_H
 #define IOS_PROJECT2_STATIC_CONSTRUCTIONS_H
 
+#include <stdbool.h>
+
 /**
  * @brief Holds all available return codes
  */
@@ -26,6 +28,7 @@ typedef enum returnCode
   PROCESS_CREATE_ERROR,
   OF_OPEN_ERROR,
   UNEXPECTED_ERROR,
+  PID_ALLOCATION_ERROR,
 } ReturnCode;
 
 /**
@@ -34,6 +37,7 @@ typedef enum returnCode
 typedef struct
 {
   int ne, nr, te, tr;
+  bool pflag;
 } Params;
 
 #endif //IOS_PROJECT2_STATIC_CONSTRUCTIONS_H

@@ -8,14 +8,53 @@
 #include "process_handlers.h"
 
 /**
+ * @brief Add random number of elves
+ * 
+ * Generate random number of new elves based on NE argument to help with work when called
+ */
+void addElves()
+{
+  size_t newElvesCount = elves_count + (random() % params.ne) + 1;
+
+  pid_t *tmp = (pid_t*)realloc(elf_processes, newElvesCount * sizeof(pid_t));
+  if (tmp == NULL)
+  {
+    globalElvesReturncode = PID_ALLOCATION_ERROR;
+    return;
+  }
+
+  elf_processes = tmp;
+
+  for (size_t i = elves_count; i < newElvesCount; i++)
+  {
+    pid_t tmp_proc = fork();
+
+    if (tmp_proc < 0)
+    {
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
+    {
+      handle_elf(i + 1);
+      exit(0);
+    }
+    else
+    {
+      elf_processes[i] = tmp_proc;
+    }
+  }
+
+  elves_count = newElvesCount;
+}
+
+/**
  * @brief Handler for elf processes
  *
  * Solves elves work and comunicate with Santa
  *
  * @param id id of elf
- * @param params loaded params from argument
  */
-void handle_elf(int id, Params params)
+void handle_elf(int id)
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: started\n", *actionId, id);
@@ -99,9 +138,8 @@ void handle_elf(int id, Params params)
  * Wait for all raindeers to return and wakeup Santa
  *
  * @param id id of raindeer
- * @param params loaded params from argument
  */
-void handle_rd(int id, Params params)
+void handle_rd(int id)
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: RD %d: started\n", *actionId, id);
@@ -135,10 +173,8 @@ void handle_rd(int id, Params params)
  * @brief Handler for Santa process
  *
  * Sleep, help elves and prepare raindeers
- *
- * @param params loaded params from argument
  */
-void handle_santa(Params params)
+void handle_santa()
 {
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
@@ -194,4 +230,5 @@ void handle_santa(Params params)
   fprintf(outputFile, "%d: Santa: Christmas started\n", *actionId);
   *actionId += 1;
   sem_post(writeOutLock);
+  *christmasStarted = 1;
 }

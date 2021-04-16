@@ -9,6 +9,14 @@
 
 pid_t pid_mainprocess = 0;
 
+pid_t *elf_processes = NULL;
+size_t elves_count = 0;
+ReturnCode globalElvesReturncode = NO_ERROR;
+
+Params params;
+
+pid_t processHandlers[3];
+
 sem_t *writeOutLock = NULL;
 sem_t *rdWaitForHitch = NULL;
 sem_t *rdHitched = NULL;
@@ -26,5 +34,7 @@ int shm_shopClosed_id = 0;
 int *shopClosed = NULL;
 int shm_actionId_id = 0;
 int *actionId = NULL;
+int shm_christmasStarted_id = 0;
+int *christmasStarted = NULL;
 
 FILE *outputFile = NULL;
