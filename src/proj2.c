@@ -94,10 +94,10 @@ int main (int argc, char *argv[])
 
       if (tmp_proc < 0)
       {
-        for (size_t i = 0; i < elves_count; i++)
+        for (size_t j = 0; j < elves_count; j++)
         {
-          if (elf_processes[i] != 0)
-            kill(elf_processes[i], SIGINT);
+          if (elf_processes[j] != 0)
+            kill(elf_processes[j], SIGINT);
         }
         handleErrors(PROCESS_CREATE_ERROR);
       }
@@ -160,10 +160,10 @@ int main (int argc, char *argv[])
 
       if (tmp_proc < 0)
       {
-        for (int i = 0; i < params.nr; i++)
+        for (int j = 0; j < params.nr; j++)
         {
-          if (rd_processes[i] != 0)
-            kill(rd_processes[i], SIGINT);
+          if (rd_processes[j] != 0)
+            kill(rd_processes[j], SIGINT);
         }
         handleErrors(PROCESS_CREATE_ERROR);
       }
