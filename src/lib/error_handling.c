@@ -7,8 +7,6 @@
 
 #include "error_handling.h"
 
-bool killMainCalled = false;
-
 /**
  * @brief Deallocate all used memory, kill processes and exit
  */
@@ -35,9 +33,8 @@ void terminate()
 
     deallocateResources();
   }
-  else if (!killMainCalled)
+  else
   {
-    killMainCalled = true;
     kill(pid_mainprocess, SIGQUIT);
   }
 
