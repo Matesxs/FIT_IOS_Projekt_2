@@ -34,45 +34,45 @@ ReturnCode deallocateResources()
 
   // Destroy semafors
   if (sem_destroy(writeOutLock) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(rdWaitForHitch) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(rdHitched) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(getHelp) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(waitForHelp) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(elfHelped) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(wakeForHelp) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(wakeForHitch) == -1)
-    retVal = SEMAPHOR_DESTROY_ERROR;
+    retVal |= SEMAPHOR_DESTROY_ERROR;
 
   // Deallocate shared memory
   if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_DESTROY_ERROR;
   if (shmctl(shm_elfReadyQueue_id, IPC_RMID, NULL) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_DESTROY_ERROR;
   if (shmctl(shm_shopClosed_id, IPC_RMID, NULL) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_DESTROY_ERROR;
   if (shmctl(shm_actionId_id, IPC_RMID, NULL) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_DESTROY_ERROR;
   if (shmctl(shm_christmasStarted_id, IPC_RMID, NULL) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_DESTROY_ERROR;
 
   // Unlink shared memory
   if (shmdt(readyRDCount) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_UNLINK_ERROR;
   if (shmdt(elfReadyQueue) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_UNLINK_ERROR;
   if (shmdt(shopClosed) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_UNLINK_ERROR;
   if (shmdt(actionId) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_UNLINK_ERROR;
   if (shmdt(christmasStarted) == -1)
-    retVal = SM_DESTROY_ERROR;
+    retVal |= SM_UNLINK_ERROR;
 
   if (retVal != NO_ERROR)
     return retVal;
