@@ -8,6 +8,9 @@
 #include "shared_resources.h"
 #include "error_handling.h"
 
+#define NO_ID -1
+
 void handleUsrSignal();
 void initSignals();
 ReturnCode parseArguments(int argc, char *argv[]);
+void printToOutput(char *entityName, int id, char *message);

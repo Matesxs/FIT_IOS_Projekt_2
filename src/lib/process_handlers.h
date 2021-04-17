@@ -15,6 +15,7 @@
 #include "static_constructions.h"
 #include "shared_resources.h"
 #include "error_handling.h"
+#include "utils.h"
 
 void addElves();
 void handle_elf(int id);

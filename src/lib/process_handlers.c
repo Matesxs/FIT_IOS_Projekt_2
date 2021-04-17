@@ -59,10 +59,7 @@ void handle_elf(int id)
   // Init random generator
   srand(time(NULL) * getpid());
 
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: Elf %d: started\n", *actionId, id);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("Elf", id, "started");
 
   while (true)
   {
@@ -70,10 +67,7 @@ void handle_elf(int id)
     unsigned int work_time = (random() % (params.te + 1));
     usleep(work_time * 1000);
 
-    sem_wait(writeOutLock);
-    fprintf(outputFile, "%d: Elf %d: need help\n", *actionId, id);
-    *actionId += 1;
-    sem_post(writeOutLock);
+    printToOutput("Elf", id, "need help");
 
     // If shop is closed go elf dont need help and can take holidays
     if (*shopClosed) break;
@@ -111,10 +105,7 @@ void handle_elf(int id)
     *elfReadyQueue -= 1;
     if (leave) break;
 
-    sem_wait(writeOutLock);
-    fprintf(outputFile, "%d: Elf %d: get help\n", *actionId, id);
-    *actionId += 1;
-    sem_post(writeOutLock);
+    printToOutput("Elf", id, "get help");
 
     // Get help from Santa
     sem_post(elfHelped);
@@ -129,10 +120,7 @@ void handle_elf(int id)
   }
 
   // take holidays
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: Elf %d: taking holidays\n", *actionId, id);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("Elf", id, "taking holidays");
 }
 
 /**
@@ -147,19 +135,13 @@ void handle_rd(int id)
   // Init random generator
   srand(time(NULL) * getpid());
 
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: RD %d: rstarted\n", *actionId, id);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("RD", id, "rstarted");
 
   // Wait some time before going home
   unsigned int vac_time = (random() % ((params.tr - params.tr / 2) + 1)) + params.tr / 2;
   usleep(vac_time * 1000);
 
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: RD %d: return home\n", *actionId, id);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("RD", id, "return home");
 
   // Wait for hitch
   *readyRDCount += 1;
@@ -168,10 +150,7 @@ void handle_rd(int id)
 
   sem_wait(rdWaitForHitch);
 
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: RD %d: get hitched\n", *actionId, id);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("RD", id, "get hitched");
   sem_post(rdHitched);
 }
 
@@ -182,20 +161,14 @@ void handle_rd(int id)
  */
 void handle_santa()
 {
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("Santa", NO_ID, "going to sleep");
 
   while (true)
   {
     // Santa will get woken up and will go help elfs
     if (sem_trywait(wakeForHelp) == 0)
     {
-      sem_wait(writeOutLock);
-      fprintf(outputFile, "%d: Santa: helping elves\n", *actionId);
-      *actionId += 1;
-      sem_post(writeOutLock);
+      printToOutput("Santa", NO_ID, "helping elves");
 
       // Help 3 elves
       sem_post(getHelp);
@@ -206,21 +179,14 @@ void handle_santa()
       sem_wait(elfHelped);
       sem_wait(elfHelped);
 
-      sem_wait(writeOutLock);
-      fprintf(outputFile, "%d: Santa: going to sleep\n", *actionId);
-      *actionId += 1;
-      sem_post(writeOutLock);
+      printToOutput("Santa", NO_ID, "going to sleep");
     }
 
-    // All RDs ready for hitching
+    // All RDs ready for hitching, close workshop
     if (sem_trywait(wakeForHitch) == 0)
     {
-      sem_wait(writeOutLock);
-      fprintf(outputFile, "%d: Santa: closing workshop\n", *actionId);
-      *actionId += 1;
-      sem_post(writeOutLock);
+      printToOutput("Santa", NO_ID, "closing workshop");
       *shopClosed = 1;
-
       break;
     }
   }
@@ -232,9 +198,6 @@ void handle_santa()
     sem_wait(rdHitched);
   }
 
-  sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: Santa: Christmas started\n", *actionId);
-  *actionId += 1;
-  sem_post(writeOutLock);
+  printToOutput("Santa", NO_ID, "Christmas started");
   *christmasStarted = 1;
 }

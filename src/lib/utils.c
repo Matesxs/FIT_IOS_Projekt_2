@@ -67,3 +67,27 @@ void handleUsrSignal()
   if (processHandlers[1] != 0)
     kill(processHandlers[1], SIGUSR1);
 }
+  
+/**
+ * @brief Print @p message to output stream
+ * 
+ * @param entityName name of entity calling this function
+ * @param id id of entity calling this function
+ * @param message message to print
+ */
+void printToOutput(char *entityName, int id, char *message)
+{
+  sem_wait(writeOutLock);
+
+  if (id < 0)
+  {
+    fprintf(outputFile, "%d: %s: %s\n", *actionId, entityName, message);
+  }
+  else
+  {
+    fprintf(outputFile, "%d: %s %d: %s\n", *actionId, entityName, id, message);
+  }
+
+  *actionId += 1;
+  sem_post(writeOutLock);
+}
