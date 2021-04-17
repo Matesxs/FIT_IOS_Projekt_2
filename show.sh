@@ -1,11 +1,14 @@
-echo "Memory"
+echo "Memory:"
 ipcs -tm | grep "$(whoami)"
 
-echo "Semaphors"
+echo
+echo "Semaphors:"
 ipcs -ts | grep "$(whoami)"
 
-echo "Files of semaphors"
+echo
+echo "Files of semaphors:"
 find /dev/shm -user "$(whoami)"
 
-echo "Processes"
+echo
+echo "Processes:"
 ps ux
