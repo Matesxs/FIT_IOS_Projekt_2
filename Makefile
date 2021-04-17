@@ -5,7 +5,7 @@ OBJECT_FOLDER=obj
 SOURCE_FOLDER=src
 
 CC=gcc
-CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -lrt -lpthread -g
+CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -lrt -lpthread
 SUFFIX=c
 
 ADDITIONAL_CLEANU=proj2.out docs
