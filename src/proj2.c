@@ -10,7 +10,6 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
-#include <time.h>
 
 #include "lib/static_constructions.h"
 #include "lib/resource_allocation.h"
@@ -36,12 +35,6 @@ int main (int argc, char *argv[])
     handleErrors(OF_OPEN_ERROR);
   setbuf(outputFile, NULL);
 
-  // Create holder for process creators
-  pid_t processCreatorProcess;
-
-  // Init random generator
-  srand(time(NULL) * getpid());
-
   // Allocate shared resources
   handleErrors(allocateResources());
 
@@ -53,7 +46,7 @@ int main (int argc, char *argv[])
   *christmasStarted = 0;
 
   // Create Santa process
-  processCreatorProcess = fork();
+  pid_t processCreatorProcess = fork();
   if (processCreatorProcess < 0)
   {
     // printf("[DEBUG] Santa creator fork");

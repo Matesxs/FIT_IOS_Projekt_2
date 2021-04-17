@@ -56,6 +56,9 @@ void addElves()
  */
 void handle_elf(int id)
 {
+  // Init random generator
+  srand(time(NULL) * getpid());
+
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: Elf %d: started\n", *actionId, id);
   *actionId += 1;
@@ -141,6 +144,9 @@ void handle_elf(int id)
  */
 void handle_rd(int id)
 {
+  // Init random generator
+  srand(time(NULL) * getpid());
+
   sem_wait(writeOutLock);
   fprintf(outputFile, "%d: RD %d: started\n", *actionId, id);
   *actionId += 1;

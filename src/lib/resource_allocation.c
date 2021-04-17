@@ -49,8 +49,6 @@ ReturnCode deallocateResources()
     retVal = SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(wakeForHitch) == -1)
     retVal = SEMAPHOR_DESTROY_ERROR;
-  if (retVal != NO_ERROR)
-    return retVal;
 
   // Deallocate shared memory
   if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1)
@@ -63,6 +61,8 @@ ReturnCode deallocateResources()
     retVal = SM_DESTROY_ERROR;
   if (shmctl(shm_christmasStarted_id, IPC_RMID, NULL) == -1)
     retVal = SM_DESTROY_ERROR;
+
+  // Unlink shared memory
   if (shmdt(readyRDCount) == -1)
     retVal = SM_DESTROY_ERROR;
   if (shmdt(elfReadyQueue) == -1)
