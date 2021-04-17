@@ -67,16 +67,16 @@ void handle_elf(int id)
   while (true)
   {
     // Work for random amount of time
-    unsigned int work_time = random() % (params.te + 1);
+    unsigned int work_time = (random() % (params.te + 1));
     usleep(work_time * 1000);
-
-    // If shop is closed go elf dont need help and can take holidays
-    if (*shopClosed) break;
 
     sem_wait(writeOutLock);
     fprintf(outputFile, "%d: Elf %d: need help\n", *actionId, id);
     *actionId += 1;
     sem_post(writeOutLock);
+
+    // If shop is closed go elf dont need help and can take holidays
+    if (*shopClosed) break;
 
     // Wait in queue for empty workshop
     bool leave = false;
@@ -148,7 +148,7 @@ void handle_rd(int id)
   srand(time(NULL) * getpid());
 
   sem_wait(writeOutLock);
-  fprintf(outputFile, "%d: RD %d: started\n", *actionId, id);
+  fprintf(outputFile, "%d: RD %d: rstarted\n", *actionId, id);
   *actionId += 1;
   sem_post(writeOutLock);
 
