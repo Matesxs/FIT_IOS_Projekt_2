@@ -31,6 +31,13 @@ ReturnCode deallocateResources()
     elves_count = 0;
   }
 
+  if (rd_processes != NULL)
+  {
+    free(rd_processes);
+    rd_processes = NULL;
+    rd_count = 0;
+  }
+
   ReturnCode retVal = NO_ERROR;
 
   // Destroy semafors

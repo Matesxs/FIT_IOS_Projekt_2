@@ -7,19 +7,40 @@
 
 #include "error_handling.h"
 
+bool killMainCalled = false;
+
 /**
  * @brief Deallocate all used memory, kill processes and exit
  */
 void terminate()
 {
-  kill(pid_mainprocess, SIGQUIT);
-  for (size_t j = 0; j < elves_count; j++)
+  if (getpid() == pid_mainprocess)
   {
-    if (elf_processes[j] != 0)
-      kill(elf_processes[j], SIGQUIT);
+    for (size_t j = 0; j < elves_count; j++)
+    {
+      if (elf_processes[j] != 0)
+        kill(elf_processes[j], SIGQUIT);
+    }
+
+    for (size_t j = 0; j < rd_count; j++)
+    {
+      if (rd_processes[j] != 0)
+        kill(rd_processes[j], SIGQUIT);
+    }
+
+    if (santa_process != 0)
+    {
+      kill(santa_process, SIGQUIT);
+    }
+
+    deallocateResources();
   }
-  kill(getpid(), SIGQUIT);
-  deallocateResources();
+  else if (!killMainCalled)
+  {
+    killMainCalled = true;
+    kill(pid_mainprocess, SIGQUIT);
+  }
+
   exit(1);
 }
 

@@ -13,6 +13,11 @@ pid_t *elf_processes = NULL;
 size_t elves_count = 0;
 ReturnCode globalElvesReturncode = NO_ERROR;
 
+pid_t *rd_processes = NULL;
+size_t rd_count = 0;
+
+pid_t santa_process = 0;
+
 Params params;
 
 sem_t *writeOutLock = NULL;
