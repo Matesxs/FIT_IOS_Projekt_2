@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
         for (size_t i = 0; i < elves_count; i++)
         {
           if (elf_processes[i] != 0)
-            kill(elf_processes[i], SIGQUIT);
+            kill(elf_processes[i], SIGINT);
         }
         handleErrors(PROCESS_CREATE_ERROR);
       }
@@ -163,7 +163,7 @@ int main (int argc, char *argv[])
         for (int i = 0; i < params.nr; i++)
         {
           if (rd_processes[i] != 0)
-            kill(rd_processes[i], SIGQUIT);
+            kill(rd_processes[i], SIGINT);
         }
         handleErrors(PROCESS_CREATE_ERROR);
       }
