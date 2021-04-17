@@ -12,10 +12,10 @@
  */
 void initSignals()
 {
-  signal(SIGUSR1, handleUsrSignal);
   signal(SIGQUIT, terminate);
   signal(SIGINT, terminate);
   signal(SIGTERM, terminate);
+  signal(SIGUSR1, SIG_IGN);
 }
 
 /**
@@ -57,15 +57,6 @@ ReturnCode parseArguments(int argc, char *argv[])
   }
 
   return NO_ERROR;
-}
-
-/**
- * @brief Forward USR1 signal to elves creator process
- */
-void handleUsrSignal()
-{
-  if (processHandlers[1] != 0)
-    kill(processHandlers[1], SIGUSR1);
 }
   
 /**

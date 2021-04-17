@@ -41,6 +41,5 @@ extern pid_t pid_mainprocess;
 extern pid_t *elf_processes;
 extern size_t elves_count;
 extern ReturnCode globalElvesReturncode;
-extern pid_t processHandlers[3];
 
 #endif //IOS_PROJECT2_SHARED_RESOURCES_H

@@ -15,8 +15,6 @@ ReturnCode globalElvesReturncode = NO_ERROR;
 
 Params params;
 
-pid_t processHandlers[3];
-
 sem_t *writeOutLock = NULL;
 sem_t *rdWaitForHitch = NULL;
 sem_t *rdHitched = NULL;

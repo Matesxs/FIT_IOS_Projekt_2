@@ -45,149 +45,96 @@ int main (int argc, char *argv[])
   *actionId = 1;
   *christmasStarted = 0;
 
-  // Create Santa process
-  pid_t processCreatorProcess = fork();
-  if (processCreatorProcess < 0)
+  pid_t santa_process = fork();
+
+  if (santa_process < 0)
   {
     handleErrors(PROCESS_CREATE_ERROR);
   }
-  else if (processCreatorProcess == 0)
+  else if (santa_process == 0)
   {
-    pid_t santa_process = fork();
+    handle_santa();
+    exit(0);
+  }
 
-    if (santa_process < 0)
+  elf_processes = (pid_t*)malloc(sizeof(pid_t) * params.ne);
+  if (elf_processes == NULL)
+  {
+    handleErrors(PROCESS_CREATE_ERROR);
+  }
+  elves_count = params.ne;
+
+  for (size_t i = 0; i < elves_count; i++)
+  {
+    pid_t tmp_proc = fork();
+
+    if (tmp_proc < 0)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
-    else if (santa_process == 0)
+    else if (tmp_proc == 0)
     {
-      handle_santa();
+      handle_elf(i + 1);
+      exit(0);
+    }
+    else
+    {
+      elf_processes[i] = tmp_proc;
+    }
+  }
+
+  pid_t rd_processes[params.nr];
+
+  for (int i = 0; i < params.nr; i++)
+  {
+    pid_t tmp_proc = fork();
+
+    if (tmp_proc < 0)
+    {
+      for (int j = 0; j < params.nr; j++)
+      {
+        if (rd_processes[j] != 0)
+          kill(rd_processes[j], SIGQUIT);
+      }
+      handleErrors(PROCESS_CREATE_ERROR);
+    }
+    else if (tmp_proc == 0)
+    {
+      handle_rd(i + 1);
       exit(0);
     }
 
-    waitpid(santa_process, NULL, 0);
-    exit(0);
+    rd_processes[i] = tmp_proc;
   }
 
-  processHandlers[0] = processCreatorProcess;
-
-  // Create elves processes
-  processCreatorProcess = fork();
-  if (processCreatorProcess < 0)
+  // If there is pflag
+  if (params.pflag)
   {
-    handleErrors(PROCESS_CREATE_ERROR);
-  }
-  else if (processCreatorProcess == 0)
-  {
-    signal(SIGUSR1, SIG_IGN);
+    // Add handler for usr signal 1
+    signal(SIGUSR1, addElves);
 
-    elf_processes = (pid_t*)malloc(sizeof(pid_t) * params.ne);
-    if (elf_processes == NULL)
+    // Wait for signals before waiting for elves
+    while (true)
     {
-      handleErrors(PROCESS_CREATE_ERROR);
-    }
-    elves_count = params.ne;
-
-    for (size_t i = 0; i < elves_count; i++)
-    {
-      pid_t tmp_proc = fork();
-
-      if (tmp_proc < 0)
-      {
-        for (size_t j = 0; j < elves_count; j++)
-        {
-          if (elf_processes[j] != 0)
-            kill(elf_processes[j], SIGINT);
-        }
-        handleErrors(PROCESS_CREATE_ERROR);
-      }
-      else if (tmp_proc == 0)
-      {
-        handle_elf(i + 1);
-        exit(0);
-      }
-      else
-      {
-        elf_processes[i] = tmp_proc;
-      }
-    }
-
-    // If there is pflag
-    if (params.pflag)
-    {
-      // Add handler for usr signal 1
-      signal(SIGUSR1, addElves);
-
-      // Wait for signals before waiting for elves
-      while (true)
-      {
-        if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
-        if (*christmasStarted) break;
-      }
-
-      // Remove handler for usr signal 1
-      signal(SIGUSR1, SIG_IGN);
       if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
+      if (*christmasStarted) break;
     }
 
-    for (size_t i = 0; i < elves_count; i++)
-      waitpid(elf_processes[i], NULL, 0);
-
-    if (elf_processes != NULL)
-    {
-      free(elf_processes);
-      elf_processes = NULL;
-      elves_count = 0;
-    }
-    exit(0);
+    // Remove handler for usr signal 1
+    signal(SIGUSR1, SIG_IGN);
+    if (globalElvesReturncode != NO_ERROR) handleErrors(globalElvesReturncode);
   }
-
-  processHandlers[1] = processCreatorProcess;
-
-  // Create raindeer processes
-  processCreatorProcess = fork();
-  if (processCreatorProcess < 0)
-  {
-    handleErrors(PROCESS_CREATE_ERROR);
-  }
-  else if (processCreatorProcess == 0)
-  {
-    pid_t rd_processes[params.nr];
-
-    for (int i = 0; i < params.nr; i++)
-    {
-      pid_t tmp_proc = fork();
-
-      if (tmp_proc < 0)
-      {
-        for (int j = 0; j < params.nr; j++)
-        {
-          if (rd_processes[j] != 0)
-            kill(rd_processes[j], SIGINT);
-        }
-        handleErrors(PROCESS_CREATE_ERROR);
-      }
-      else if (tmp_proc == 0)
-      {
-        handle_rd(i + 1);
-        exit(0);
-      }
-
-      rd_processes[i] = tmp_proc;
-    }
-
-    for (int i = 0; i < params.nr; i++)
-      waitpid(rd_processes[i], NULL, 0);
-    exit(0);
-  }
-
-  processHandlers[2] = processCreatorProcess;
 
   // Wait for all processes to finish
-  for (int i = 0; i < 3; i++)
-  {
-    waitpid(processHandlers[i], NULL, 0);
-  }
+  waitpid(santa_process, NULL, 0);
+
+  // Wait for elves to finish
+  for (size_t i = 0; i < elves_count; i++)
+    waitpid(elf_processes[i], NULL, 0);
+
+  // Wait for raindeers to finish
+  for (int i = 0; i < params.nr; i++)
+    waitpid(rd_processes[i], NULL, 0);
 
   // Clear shared resources
   handleErrors(deallocateResources());

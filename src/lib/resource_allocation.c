@@ -28,6 +28,7 @@ ReturnCode deallocateResources()
   {
     free(elf_processes);
     elf_processes = NULL;
+    elves_count = 0;
   }
 
   ReturnCode retVal = NO_ERROR;
