@@ -21,69 +21,53 @@ void terminate()
 }
 
 /**
- * Print message to console based on provided ReturnCode @p code and terminate program
+ * @brief Print message to console based on provided ReturnCode @p code and terminate program
  *
  * @param code ReturnCode to test
  */
 void handleErrors(ReturnCode code)
 {
-  switch (code) {
-    case NO_ERROR:
-      return;
+  if (code == NO_ERROR)
+    return;
 
-    case ARGUMENT_COUNT_ERROR:
-      fprintf(stderr,"Invalid number of arguments\n");
-      break;
+  if (code & ARGUMENT_COUNT_ERROR)
+    fprintf(stderr,"Invalid argument count\n");
 
-    case INVALID_ARGUMENT_ERROR:
-      fprintf(stderr,"Invalid characters in argument\n");
-      break;
+  if ((code & INVALID_ARGUMENT_ERROR) >> 1)
+    fprintf(stderr,"Invalid argument\n");
 
-    case ARGUMENT_OUT_OF_RANGE:
-      fprintf(stderr,"Argument value out of defined range\n");
-      break;
+  if ((code & SEMAPHOR_CREATION_ERROR) >> 2)
+    fprintf(stderr,"Failed to create semaphores\n");
 
-    case SEMAPHOR_CREATION_ERROR:
-      fprintf(stderr,"Failed to create semaphores\n");
-      break;
+  if ((code & SEMAPHOR_INIT_FAILED) >> 3)
+    fprintf(stderr,"Failed to initialize semaphores\n");
 
-    case SEMAPHOR_INIT_FAILED:
-      fprintf(stderr,"Failed to initialize semaphors\n");
-      break;
+  if ((code & SEMAPHOR_DESTROY_ERROR) >> 4)
+    fprintf(stderr,"Failed to destroy semaphores\n");
 
-    case SEMAPHOR_DESTROY_ERROR:
-      fprintf(stderr,"Failed to destroy semaphores\n");
-      break;
+  if ((code & SM_CREATE_ERROR) >> 5)
+    fprintf(stderr,"Failed to allocate shared memory\n");
 
-    case SM_CREATE_ERROR:
-      fprintf(stderr,"Failed to create shared memory\n");
-      break;
+  if ((code & SM_MAP_ERROR) >> 6)
+    fprintf(stderr,"Failed to map shared memory\n");
 
-    case SM_MAP_ERROR:
-      fprintf(stderr,"Failed to map shared memory\n");
-      break;
+  if ((code & SM_DESTROY_ERROR) >> 7)
+    fprintf(stderr,"Failed to deallocate shared memory\n");
 
-    case SM_DESTROY_ERROR:
-      fprintf(stderr,"Failed to destroy shared memory\n");
-      break;
+  if ((code & SM_UNLINK_ERROR) >> 8)
+    fprintf(stderr,"Failed to unlink shared memory\n");
 
-    case PROCESS_CREATE_ERROR:
-      fprintf(stderr,"Failed to create new process\n");
-      break;
+  if ((code & PROCESS_CREATE_ERROR) >> 9)
+    fprintf(stderr,"Failed to create new process\n");
 
-    case OF_OPEN_ERROR:
-      fprintf(stderr,"Failed to open output file\n");
-      break;
+  if ((code & OF_OPEN_ERROR) >> 10)
+    fprintf(stderr,"Failed to open output file\n");
 
-    case PID_ALLOCATION_ERROR:
-      fprintf(stderr,"Failed to allocate memory for pid arrays\n");
-      break;
+  if ((code & PID_ALLOCATION_ERROR) >> 11)
+    fprintf(stderr,"Failed to allocate memory for pid arrays\n");
 
-    case UNEXPECTED_ERROR:
-    default:
-      fprintf(stderr,"Unexpected error\n");
-      break;
-  }
+  if ((code & UNEXPECTED_ERROR) >> 12)
+    fprintf(stderr,"Unexpected error\n");
 
   terminate();
 }
