@@ -32,14 +32,14 @@ void terminate()
     {
       kill(santa_process, SIGQUIT);
     }
-
-    deallocateResources();
   }
   else if (!killMainCalled)
   {
     killMainCalled = true;
     kill(pid_mainprocess, SIGQUIT);
   }
+
+  deallocateResources();
 
   exit(1);
 }
