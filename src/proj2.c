@@ -26,11 +26,14 @@
  */
 int main(int argc, char *argv[])
 {
+  // Init signal handlers and get process id of main process
   initSignals();
   pid_mainprocess = getpid();
 
+  // Load arguments
   handleErrors(parseArguments(argc, argv));
 
+  // Open output stream
   if ((outputFile = fopen("proj2.out", "w")) == NULL)
     handleErrors(OF_OPEN_ERROR);
   setbuf(outputFile, NULL);
