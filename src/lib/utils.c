@@ -1,5 +1,5 @@
 /**
- * @file utility.c
+ * @file utils.c
  * @author Martin Douša
  * @date April 2021
  * @brief Utility functions

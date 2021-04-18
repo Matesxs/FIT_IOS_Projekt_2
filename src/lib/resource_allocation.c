@@ -8,7 +8,7 @@
 #define _GNU_SOURCE
 #include "resource_allocation.h"
 
-#define SEM_ERR (void*)-1
+#define SEM_ERR (void*)-1 /**< Error return value for shared memory mapping */
 
 /**
  * @brief Deallocates all memory used by semaphores and shared memory

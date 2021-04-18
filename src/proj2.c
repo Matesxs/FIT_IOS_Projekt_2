@@ -127,6 +127,7 @@ int main(int argc, char *argv[])
     {
       if (globalElvesReturncode != NO_ERROR)
         handleErrors(globalElvesReturncode);
+        
       if (*christmasStarted)
         break;
     }
