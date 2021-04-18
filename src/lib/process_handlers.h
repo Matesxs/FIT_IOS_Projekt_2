@@ -18,8 +18,8 @@
 #include "utils.h"
 
 void addElves();
-void handle_elf(int id);
-void handle_rd(int id);
+void handle_elf(size_t id);
+void handle_rd(size_t id);
 void handle_santa();
 
 #endif //IOS_PROJECT2_PROCESS_HANDLERS_H

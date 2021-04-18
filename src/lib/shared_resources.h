@@ -20,6 +20,9 @@ extern sem_t *elfHelped;
 extern sem_t *wakeForHelp;
 extern sem_t *wakeForHitch;
 extern sem_t *santaReady;
+extern sem_t *santaFinished;
+extern sem_t *elfFinished;
+extern sem_t *rdFinished;
 
 // Shared memory
 extern int shm_readyRDCount_id;

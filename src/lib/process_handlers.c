@@ -54,7 +54,7 @@ void addElves()
  *
  * @param id id of elf
  */
-void handle_elf(int id)
+void handle_elf(size_t id)
 {
   // Init random generator
   srand(time(NULL) * getpid());
@@ -121,6 +121,7 @@ void handle_elf(int id)
 
   // take holidays
   printToOutput("Elf", id, "taking holidays");
+  sem_post(elfFinished);
 }
 
 /**
@@ -130,7 +131,7 @@ void handle_elf(int id)
  *
  * @param id id of raindeer
  */
-void handle_rd(int id)
+void handle_rd(size_t id)
 {
   // Init random generator
   srand(time(NULL) * getpid());
@@ -156,6 +157,7 @@ void handle_rd(int id)
 
   printToOutput("RD", id, "get hitched");
   sem_post(rdHitched);
+  sem_post(rdFinished);
 }
 
 /**
@@ -184,13 +186,11 @@ void handle_santa()
       printToOutput("Santa", NO_ID, "helping elves");
 
       // Help 3 elves
-      sem_post(getHelp);
-      sem_post(getHelp);
-      sem_post(getHelp);
-
-      sem_wait(elfHelped);
-      sem_wait(elfHelped);
-      sem_wait(elfHelped);
+      for (int i = 0; i < 3; i++)
+      {
+        sem_post(getHelp);
+        sem_wait(elfHelped);
+      }
 
       printToOutput("Santa", NO_ID, "going to sleep");
     }
@@ -210,4 +210,5 @@ void handle_santa()
 
   printToOutput("Santa", NO_ID, "Christmas started");
   *christmasStarted = 1;
+  sem_post(santaFinished);
 }

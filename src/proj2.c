@@ -8,14 +8,12 @@
 #define _GNU_SOURCE
 
 #include <signal.h>
-#include <sys/wait.h>
 #include <stdio.h>
 
 #include "lib/static_constructions.h"
 #include "lib/resource_allocation.h"
 #include "lib/error_handling.h"
 #include "lib/process_handlers.h"
-#include "lib/utils.h"
 
 /**
  * @brief Entrypoint of program
@@ -142,15 +140,16 @@ int main(int argc, char *argv[])
   }
 
   // Wait for all processes to finish
-  waitpid(santa_process, NULL, 0);
+  // Wait for Santa to finish
+  sem_wait(santaFinished);
 
   // Wait for elves to finish
   for (size_t i = 0; i < elves_count; i++)
-    waitpid(elf_processes[i], NULL, 0);
+    sem_wait(elfFinished);
 
   // Wait for raindeers to finish
   for (int i = 0; i < params.nr; i++)
-    waitpid(rd_processes[i], NULL, 0);
+    sem_wait(rdFinished);
 
   // Clear shared resources
   handleErrors(deallocateResources());

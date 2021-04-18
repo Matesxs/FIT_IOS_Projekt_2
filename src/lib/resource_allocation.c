@@ -57,6 +57,12 @@ ReturnCode deallocateResources()
     retVal |= SEMAPHOR_DESTROY_ERROR;
   if (sem_destroy(wakeForHitch) == -1)
     retVal |= SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(santaFinished) == -1)
+    retVal |= SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(elfFinished) == -1)
+    retVal |= SEMAPHOR_DESTROY_ERROR;
+  if (sem_destroy(rdFinished) == -1)
+    retVal |= SEMAPHOR_DESTROY_ERROR;
 
   // Deallocate shared memory
   if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1)
@@ -104,7 +110,10 @@ ReturnCode allocateResources()
       (elfHelped = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (wakeForHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (wakeForHitch = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
-      (santaReady = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
+      (santaReady = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
+      (santaFinished = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
+      (elfFinished = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED || 
+      (rdFinished = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
   {
     return SEMAPHOR_CREATION_ERROR;
   }
@@ -118,7 +127,10 @@ ReturnCode allocateResources()
       sem_init(elfHelped, 1, 0) == -1 ||
       sem_init(wakeForHelp, 1, 0) == -1 ||
       sem_init(wakeForHitch, 1, 0) == -1 ||
-      sem_init(santaReady, 1, 1) == -1)
+      sem_init(santaReady, 1, 1) == -1 ||
+      sem_init(santaFinished, 1, 0) == -1 ||
+      sem_init(elfFinished, 1, 0) == -1 ||
+      sem_init(rdFinished, 1, 0) == -1)
   {
     return SEMAPHOR_INIT_FAILED;
   }
