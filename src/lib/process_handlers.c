@@ -141,12 +141,12 @@ void handle_rd(int id)
   unsigned int vac_time = (random() % ((params.tr - params.tr / 2) + 1)) + params.tr / 2;
   usleep(vac_time * 1000);
 
-  printToOutput("RD", id, "return home");
-
   // Wait for hitch
   *readyRDCount += 1;
   if (*readyRDCount == params.nr)
     sem_post(wakeForHitch);
+
+  printToOutput("RD", id, "return home");
 
   sem_wait(rdWaitForHitch);
 
@@ -165,6 +165,9 @@ void handle_santa()
 
   while (true)
   {
+    // All RDs ready for hitching, close workshop
+    if (sem_trywait(wakeForHitch) == 0) break;
+
     // Santa will get woken up and will go help elfs
     if (sem_trywait(wakeForHelp) == 0)
     {
@@ -181,15 +184,10 @@ void handle_santa()
 
       printToOutput("Santa", NO_ID, "going to sleep");
     }
-
-    // All RDs ready for hitching, close workshop
-    if (sem_trywait(wakeForHitch) == 0)
-    {
-      printToOutput("Santa", NO_ID, "closing workshop");
-      *shopClosed = 1;
-      break;
-    }
   }
+
+  printToOutput("Santa", NO_ID, "closing workshop");
+  *shopClosed = 1;
 
   for (int i = 0; i < params.nr; i++)
   {
