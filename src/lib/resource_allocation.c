@@ -103,7 +103,8 @@ ReturnCode allocateResources()
       (waitForHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (elfHelped = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
       (wakeForHelp = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
-      (wakeForHitch = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
+      (wakeForHitch = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED ||
+      (santaReady = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
   {
     return SEMAPHOR_CREATION_ERROR;
   }
@@ -116,7 +117,8 @@ ReturnCode allocateResources()
       sem_init(waitForHelp, 1, 3) == -1 ||
       sem_init(elfHelped, 1, 0) == -1 ||
       sem_init(wakeForHelp, 1, 0) == -1 ||
-      sem_init(wakeForHitch, 1, 0) == -1)
+      sem_init(wakeForHitch, 1, 0) == -1 ||
+      sem_init(santaReady, 1, 1) == -1)
   {
     return SEMAPHOR_INIT_FAILED;
   }

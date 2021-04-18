@@ -28,6 +28,7 @@ sem_t *waitForHelp = NULL;                      /**< Semaphore for elves to queu
 sem_t *getHelp = NULL;                          /**< Semaphore for elves that are on the front of queue and will get help from Santa */
 sem_t *elfHelped = NULL;                        /**< Semaphore for indicating that elf get help */
 sem_t *wakeForHelp = NULL;                      /**< Semaphore for third elf in queue to wake up Santa for helping */
+sem_t *santaReady = NULL;                       /**< Semaphore signalizing that Santa is not doing something else and can be woken up */
 
 int shm_readyRDCount_id = 0;                    /**< Shrared memory id for readyRDCount */
 int *readyRDCount = NULL;                       /**< Counter for raindeers that returned from vacation */

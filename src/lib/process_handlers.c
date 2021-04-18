@@ -144,7 +144,11 @@ void handle_rd(int id)
   // Wait for hitch
   *readyRDCount += 1;
   if (*readyRDCount == params.nr)
+  {
+    sem_wait(santaReady);
     sem_post(wakeForHitch);
+    sem_post(santaReady);
+  }
 
   printToOutput("RD", id, "return home");
 
@@ -165,8 +169,14 @@ void handle_santa()
 
   while (true)
   {
+    sem_wait(santaReady);
+
     // All RDs ready for hitching, close workshop
-    if (sem_trywait(wakeForHitch) == 0) break;
+    if (sem_trywait(wakeForHitch) == 0)
+    {
+      sem_post(santaReady);
+      break;
+    }
 
     // Santa will get woken up and will go help elfs
     if (sem_trywait(wakeForHelp) == 0)
@@ -184,6 +194,8 @@ void handle_santa()
 
       printToOutput("Santa", NO_ID, "going to sleep");
     }
+
+    sem_post(santaReady);
   }
 
   printToOutput("Santa", NO_ID, "closing workshop");
