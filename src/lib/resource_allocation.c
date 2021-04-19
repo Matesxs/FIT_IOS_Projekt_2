@@ -67,6 +67,9 @@ void destroySemaphore(sem_t **sem, ReturnCode *retVal)
   if (sem_destroy(*sem) == -1)
     (*retVal) |= SEMAPHOR_DESTROY_ERROR;
 
+  if (munmap(*sem, sizeof(sem_t)) == -1)
+    (*retVal) |= SEMAPHOR_DESTROY_ERROR;
+
   *sem = NULL;
 }
 
