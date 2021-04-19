@@ -5,8 +5,6 @@
  * @brief Entry point for Santa Claus problem solver
  */
 
-#define _GNU_SOURCE
-
 #include <signal.h>
 #include <stdio.h>
 
