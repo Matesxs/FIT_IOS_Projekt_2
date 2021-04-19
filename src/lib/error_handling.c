@@ -14,28 +14,11 @@ void terminate()
 {
   if (getpid() == pid_mainprocess)
   {
-    for (size_t j = 0; j < elves_count; j++)
-    {
-      if (elf_processes[j] != 0)
-        kill(elf_processes[j], SIGQUIT);
-    }
-
-    for (size_t j = 0; j < rd_count; j++)
-    {
-      if (rd_processes[j] != 0)
-        kill(rd_processes[j], SIGQUIT);
-    }
-
-    if (santa_process != 0)
-    {
-      kill(santa_process, SIGQUIT);
-    }
-
     deallocateResources();
   }
   else
   {
-    kill(pid_mainprocess, SIGQUIT);
+    killpg(getpgid(pid_mainprocess), SIGQUIT);
   }
 
   exit(1);
