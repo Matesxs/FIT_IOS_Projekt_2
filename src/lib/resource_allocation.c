@@ -14,23 +14,19 @@
  * @brief Create shared memory
  * 
  * @param size size of memory to allocate
- * @param sharedMemId resturn pointer of shared memory id
  * @param retVal pointer to return code that will be returned based on previous state and success of this action
  * 
  * @return void pointer to allocated memory, NULL on fail
  */
-void* createSharedMemory(size_t size, int *sharedMemId, ReturnCode *retVal)
+void* createSharedMemory(size_t size, ReturnCode *retVal)
 {
   void *mem = NULL;
 
-  if (((*sharedMemId) = shmget(IPC_PRIVATE, size, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) == -1)
+  if ((mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
   {
     (*retVal) |= SM_CREATE_ERROR;
     return NULL;
   }
-
-  if ((mem = shmat(*sharedMemId, NULL, 0)) == SEM_ERR)
-    (*retVal) |= SM_MAP_ERROR;
 
   return mem;
 }
@@ -44,14 +40,26 @@ void* createSharedMemory(size_t size, int *sharedMemId, ReturnCode *retVal)
  */
 void createSemaphore(int defVal, sem_t **sem, ReturnCode *retVal)
 {
-  if (((*sem) = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
-  {
-    (*retVal) |= SEMAPHOR_CREATION_ERROR;
-    return;
-  }
+  (*sem) = createSharedMemory(sizeof(sem_t), retVal);
 
   if (sem_init(*sem, 1, defVal) == -1)
     (*retVal) |= SEMAPHOR_INIT_FAILED;
+}
+
+/**
+ * @brief Destroy shared memory segment
+ * 
+ * @param memLink pointer to link of shared memory
+ * @param retVal pointer to return code that will be returned based on previous state and success of this action
+ */
+void destroySharedMemory(void **memLink, size_t size, ReturnCode *retVal)
+{
+  if (*memLink == NULL) return;
+
+  if (munmap(*memLink, size) == -1)
+    (*retVal) |= SM_DESTROY_ERROR;
+
+  *memLink = NULL;
 }
 
 /**
@@ -67,32 +75,9 @@ void destroySemaphore(sem_t **sem, ReturnCode *retVal)
   if (sem_destroy(*sem) == -1)
     (*retVal) |= SEMAPHOR_DESTROY_ERROR;
 
-  if (munmap(*sem, sizeof(sem_t)) == -1)
-    (*retVal) |= SEMAPHOR_DESTROY_ERROR;
+  destroySharedMemory((void**)sem, sizeof(sem), retVal);
 
   *sem = NULL;
-}
-
-/**
- * @brief Destroy shared memory segment
- * 
- * @param memId id of allocated shared memory
- * @param memLink pointer to link of shared memory
- * @param retVal pointer to return code that will be returned based on previous state and success of this action
- */
-void destroySharedMemory(int memId, void **memLink, ReturnCode *retVal)
-{
-  if (*memLink == NULL) return;
-
-  // Deallocate
-  if (shmctl(memId, IPC_RMID, NULL) == -1)
-    (*retVal) |= SM_DESTROY_ERROR;
-
-  // Unlink
-  if (shmdt(*memLink) == -1)
-    (*retVal) |= SM_UNLINK_ERROR;
-
-  *memLink = NULL;
 }
 
 /**
@@ -140,11 +125,11 @@ ReturnCode deallocateResources()
   destroySemaphore(&rdFinished, &retVal);
 
   // Destroy shared memory
-  destroySharedMemory(shm_readyRDCount_id, (void**)&readyRDCount, &retVal);
-  destroySharedMemory(shm_elfReadyQueue_id, (void**)&elfReadyQueue, &retVal);
-  destroySharedMemory(shm_shopClosed_id, (void**)&shopClosed, &retVal);
-  destroySharedMemory(shm_actionId_id, (void**)&actionId, &retVal);
-  destroySharedMemory(shm_christmasStarted_id, (void**)&christmasStarted, &retVal);
+  destroySharedMemory((void**)&readyRDCount, sizeof(int), &retVal);
+  destroySharedMemory((void**)&elfReadyQueue, sizeof(int), &retVal);
+  destroySharedMemory((void**)&shopClosed, sizeof(int), &retVal);
+  destroySharedMemory((void**)&actionId, sizeof(int), &retVal);
+  destroySharedMemory((void**)&christmasStarted, sizeof(int), &retVal);
 
   if (retVal != NO_ERROR)
     return retVal;
@@ -178,11 +163,11 @@ ReturnCode allocateResources()
   if (retVal != NO_ERROR) return retVal;
 
   // Create shared memory
-  readyRDCount = createSharedMemory(sizeof(int), &shm_readyRDCount_id, &retVal);
-  elfReadyQueue = createSharedMemory(sizeof(int), &shm_elfReadyQueue_id, &retVal);
-  shopClosed = createSharedMemory(sizeof(int), &shm_shopClosed_id, &retVal);
-  actionId = createSharedMemory(sizeof(int), &shm_actionId_id, &retVal);
-  christmasStarted = createSharedMemory(sizeof(int), &shm_christmasStarted_id, &retVal);
+  readyRDCount = createSharedMemory(sizeof(int), &retVal);
+  elfReadyQueue = createSharedMemory(sizeof(int), &retVal);
+  shopClosed = createSharedMemory(sizeof(int), &retVal);
+  actionId = createSharedMemory(sizeof(int), &retVal);
+  christmasStarted = createSharedMemory(sizeof(int), &retVal);
 
   if (retVal != NO_ERROR) return retVal;
 
