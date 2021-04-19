@@ -39,13 +39,6 @@ int main(int argc, char *argv[])
   // Allocate shared resources
   handleErrors(allocateResources());
 
-  // Init shared variables
-  *readyRDCount = 0;
-  *elfReadyQueue = 0;
-  *shopClosed = 0;
-  *actionId = 1;
-  *christmasStarted = 0;
-
   // Create Santa
   {
     santa_process = fork();
