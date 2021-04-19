@@ -11,6 +11,35 @@
 #define SEM_ERR (void*)-1 /**< Error return value for shared memory mapping */
 
 /**
+ * @brief Destroy existing semaphore
+ * 
+ * @param sem pointer to semaphore to destroy
+ * @param retVal return code that will be returned based on previous state and success of this action
+ */
+void destroySemaphore(sem_t **sem, ReturnCode *retVal)
+{
+  if (*sem == NULL) return;
+
+  if (sem_destroy(*sem) == -1)
+    (*retVal) |= SEMAPHOR_DESTROY_ERROR;
+
+  *sem = NULL;
+}
+
+void destroySharedMemory(int memId, void **memLink, ReturnCode *retVal)
+{
+  // Deallocate
+  if (shmctl(memId, IPC_RMID, NULL) == -1)
+    (*retVal) |= SM_DESTROY_ERROR;
+
+  // Unlink
+  if (shmdt(*memLink) == -1)
+    (*retVal) |= SM_UNLINK_ERROR;
+
+  *memLink = NULL;
+}
+
+/**
  * @brief Deallocates all memory used by semaphores and shared memory
  *
  * @return ReturnCode with NO_ERROR if it was successful or error code
@@ -41,52 +70,25 @@ ReturnCode deallocateResources()
   ReturnCode retVal = NO_ERROR;
 
   // Destroy semafors
-  if (sem_destroy(writeOutLock) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(rdWaitForHitch) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(rdHitched) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(getHelp) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(waitForHelp) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(elfHelped) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(wakeForHelp) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(wakeForHitch) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(santaFinished) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(elfFinished) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
-  if (sem_destroy(rdFinished) == -1)
-    retVal |= SEMAPHOR_DESTROY_ERROR;
+  destroySemaphore(&writeOutLock, &retVal);
+  destroySemaphore(&rdWaitForHitch, &retVal);
+  destroySemaphore(&rdHitched, &retVal);
+  destroySemaphore(&getHelp, &retVal);
+  destroySemaphore(&waitForHelp, &retVal);
+  destroySemaphore(&elfHelped, &retVal);
+  destroySemaphore(&wakeForHelp, &retVal);
+  destroySemaphore(&wakeForHitch, &retVal);
+  destroySemaphore(&santaReady, &retVal);
+  destroySemaphore(&santaFinished, &retVal);
+  destroySemaphore(&elfFinished, &retVal);
+  destroySemaphore(&rdFinished, &retVal);
 
-  // Deallocate shared memory
-  if (shmctl(shm_readyRDCount_id, IPC_RMID, NULL) == -1)
-    retVal |= SM_DESTROY_ERROR;
-  if (shmctl(shm_elfReadyQueue_id, IPC_RMID, NULL) == -1)
-    retVal |= SM_DESTROY_ERROR;
-  if (shmctl(shm_shopClosed_id, IPC_RMID, NULL) == -1)
-    retVal |= SM_DESTROY_ERROR;
-  if (shmctl(shm_actionId_id, IPC_RMID, NULL) == -1)
-    retVal |= SM_DESTROY_ERROR;
-  if (shmctl(shm_christmasStarted_id, IPC_RMID, NULL) == -1)
-    retVal |= SM_DESTROY_ERROR;
-
-  // Unlink shared memory
-  if (shmdt(readyRDCount) == -1)
-    retVal |= SM_UNLINK_ERROR;
-  if (shmdt(elfReadyQueue) == -1)
-    retVal |= SM_UNLINK_ERROR;
-  if (shmdt(shopClosed) == -1)
-    retVal |= SM_UNLINK_ERROR;
-  if (shmdt(actionId) == -1)
-    retVal |= SM_UNLINK_ERROR;
-  if (shmdt(christmasStarted) == -1)
-    retVal |= SM_UNLINK_ERROR;
+  // Destroy shared memory
+  destroySharedMemory(shm_readyRDCount_id, (void**)&readyRDCount, &retVal);
+  destroySharedMemory(shm_elfReadyQueue_id, (void**)&elfReadyQueue, &retVal);
+  destroySharedMemory(shm_shopClosed_id, (void**)&shopClosed, &retVal);
+  destroySharedMemory(shm_actionId_id, (void**)&actionId, &retVal);
+  destroySharedMemory(shm_christmasStarted_id, (void**)&christmasStarted, &retVal);
 
   if (retVal != NO_ERROR)
     return retVal;
