@@ -12,30 +12,30 @@
  */
 void terminate()
 {
-  if (getpid() == pid_mainprocess)
+  if (getpid() == processHolder.mainId)
   {
-    for (size_t j = 0; j < elves_count; j++)
+    for (size_t j = 0; j < processHolder.elvesCount; j++)
     {
-      if (elf_processes[j] != 0)
-        kill(elf_processes[j], SIGQUIT);
+      if (processHolder.elfIds[j] != 0)
+        kill(processHolder.elfIds[j], SIGQUIT);
     }
 
-    for (size_t j = 0; j < rd_count; j++)
+    for (size_t j = 0; j < processHolder.rdCount; j++)
     {
-      if (rd_processes[j] != 0)
-        kill(rd_processes[j], SIGQUIT);
+      if (processHolder.rdIds[j] != 0)
+        kill(processHolder.rdIds[j], SIGQUIT);
     }
 
-    if (santa_process != 0)
+    if (processHolder.santaId != 0)
     {
-      kill(santa_process, SIGQUIT);
+      kill(processHolder.santaId, SIGQUIT);
     }
 
     deallocateResources();
   }
   else
   {
-    kill(pid_mainprocess, SIGQUIT);
+    kill(processHolder.mainId, SIGQUIT);
   }
 
   exit(1);

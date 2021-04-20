@@ -14,18 +14,18 @@
  */
 void addElves()
 {
-  size_t newElvesCount = elves_count + (random() % params.ne) + 1;
+  size_t newElvesCount = processHolder.elvesCount + (random() % params.ne) + 1;
 
-  pid_t *tmp = (pid_t*)realloc(elf_processes, newElvesCount * sizeof(pid_t));
+  pid_t *tmp = (pid_t*)realloc(processHolder.elfIds, newElvesCount * sizeof(pid_t));
   if (tmp == NULL)
   {
     globalElvesReturncode = PID_ALLOCATION_ERROR;
     return;
   }
 
-  elf_processes = tmp;
+  processHolder.elfIds = tmp;
 
-  for (size_t i = elves_count; i < newElvesCount; i++)
+  for (size_t i = processHolder.elvesCount; i < newElvesCount; i++)
   {
     pid_t tmp_proc = fork();
 
@@ -40,11 +40,11 @@ void addElves()
     }
     else
     {
-      elf_processes[i] = tmp_proc;
+      processHolder.elfIds[i] = tmp_proc;
     }
   }
 
-  elves_count = newElvesCount;
+  processHolder.elvesCount = newElvesCount;
 }
 
 /**

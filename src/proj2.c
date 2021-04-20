@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
   // Init signal handlers and get process id of main process
   initSignals();
-  pid_mainprocess = getpid();
+  processHolder.mainId = getpid();
 
   // Load arguments
   handleErrors(parseArguments(argc, argv));
@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
 
   // Create Santa
   {
-    santa_process = fork();
+    processHolder.santaId = fork();
 
-    if (santa_process < 0)
+    if (processHolder.santaId < 0)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
-    else if (santa_process == 0)
+    else if (processHolder.santaId == 0)
     {
       handle_santa();
       exit(0);
@@ -54,14 +54,14 @@ int main(int argc, char *argv[])
 
   // Create elves
   {
-    elf_processes = (pid_t *)malloc(sizeof(pid_t) * params.ne);
-    if (elf_processes == NULL)
+    processHolder.elfIds = (pid_t *)malloc(sizeof(pid_t) * params.ne);
+    if (processHolder.elfIds == NULL)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
-    elves_count = params.ne;
+    processHolder.elvesCount = params.ne;
 
-    for (size_t i = 0; i < elves_count; i++)
+    for (size_t i = 0; i < processHolder.elvesCount; i++)
     {
       pid_t tmp_proc = fork();
 
@@ -76,21 +76,21 @@ int main(int argc, char *argv[])
       }
       else
       {
-        elf_processes[i] = tmp_proc;
+        processHolder.elfIds[i] = tmp_proc;
       }
     }
   }
 
   // Create raindeers
   {
-    rd_processes = (pid_t *)malloc(sizeof(pid_t) * params.nr);
-    if (rd_processes == NULL)
+    processHolder.rdIds = (pid_t *)malloc(sizeof(pid_t) * params.nr);
+    if (processHolder.rdIds == NULL)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
-    rd_count = params.nr;
+    processHolder.rdCount = params.nr;
 
-    for (size_t i = 0; i < rd_count; i++)
+    for (size_t i = 0; i < processHolder.rdCount; i++)
     {
       pid_t tmp_proc = fork();
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         exit(0);
       }
 
-      rd_processes[i] = tmp_proc;
+      processHolder.rdIds[i] = tmp_proc;
     }
   }
 
@@ -135,11 +135,11 @@ int main(int argc, char *argv[])
   sem_wait(&semHolder->santaFinished);
 
   // Wait for elves to finish
-  for (size_t i = 0; i < elves_count; i++)
+  for (size_t i = 0; i < processHolder.elvesCount; i++)
     sem_wait(&semHolder->elfFinished);
 
   // Wait for raindeers to finish
-  for (size_t i = 0; i < rd_count; i++)
+  for (size_t i = 0; i < processHolder.rdCount; i++)
     sem_wait(&semHolder->rdFinished);
 
   // Clear shared resources

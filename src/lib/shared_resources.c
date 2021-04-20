@@ -7,16 +7,8 @@
 
 #include "shared_resources.h"
 
-pid_t pid_mainprocess = 0;                      /**< Holds process id of main process */
-
-pid_t *elf_processes = NULL;                    /**< Pointer to array of generated elves */
-size_t elves_count = 0;                         /**< Counter that represents number of elves created */
+ProcessHolder processHolder = { 0 };            /**< Holder for all information about process ids and its count */
 ReturnCode globalElvesReturncode = NO_ERROR;    /**< ReturnCode for checking if there was no error when creating new elves */
-
-pid_t *rd_processes = NULL;                     /**< Pointer to array of generated raindeers */
-size_t rd_count = 0;                            /**< Counter that represents number of raindeers created */
-
-pid_t santa_process = 0;                        /**< Process id of Santa */
 
 Params params;                                  /**< Holder for parsed arguments */
 

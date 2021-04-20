@@ -9,8 +9,30 @@
 #define IOS_PROJECT2_STATIC_CONSTRUCTIONS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <semaphore.h>
 
+/**
+ * @struct process_holder
+ * @brief Structure for holding information about processes
+ */
+typedef struct process_holder
+{
+  pid_t mainId;                   /**< Process id of main process */
+  
+  pid_t *elfIds;                  /**< Array of process ids for all elves */
+  size_t elvesCount;              /**< Length of elf ids array */
+
+  pid_t *rdIds;                   /**< Array of process ids for all raindeers */
+  size_t rdCount;                 /**< Length of raindeer ids array */
+
+  pid_t santaId;                  /**< Process id of Santa process */
+} ProcessHolder;
+
+/**
+ * @struct sem_holder
+ * @brief Struct for holding all semaphores
+ */
 typedef struct sem_holder
 {
   sem_t writeOutLock;             /**< Semaphore for writing to output file */
@@ -27,6 +49,10 @@ typedef struct sem_holder
   sem_t rdFinished;               /**< Semaphore signalizing that raindeer process finished */
 } SemHolder;
 
+/**
+ * @struct shared_memory
+ * @brief Struct for holding shared memory
+ */
 typedef struct shared_memory
 {
   int readyRDCount;               /**< Counter for raindeers that returned from vacation */
@@ -55,9 +81,10 @@ typedef enum returnCode
 } ReturnCode;
 
 /**
+ * @struct prmtrs
  * @brief Holds all parameters extracted from arguments
  */
-typedef struct
+typedef struct prmtrs
 {
   int ne;     /**< Number of elves to generate */
   int nr;     /**< Number of raindeers to generate */

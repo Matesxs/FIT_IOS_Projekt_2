@@ -85,18 +85,18 @@ ReturnCode deallocateResources()
     outputFile = NULL;
   }
 
-  if (elf_processes != NULL)
+  if (processHolder.elfIds != NULL)
   {
-    free(elf_processes);
-    elf_processes = NULL;
-    elves_count = 0;
+    free(processHolder.elfIds);
+    processHolder.elfIds = NULL;
+    processHolder.elvesCount = 0;
   }
 
-  if (rd_processes != NULL)
+  if (processHolder.rdIds != NULL)
   {
-    free(rd_processes);
-    rd_processes = NULL;
-    rd_count = 0;
+    free(processHolder.rdIds);
+    processHolder.rdIds = NULL;
+    processHolder.rdCount = 0;
   }
 
   ReturnCode retVal = NO_ERROR;
