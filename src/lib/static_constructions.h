@@ -86,11 +86,11 @@ typedef enum returnCode
  */
 typedef struct prmtrs
 {
-  int ne;     /**< Number of elves to generate */
-  int nr;     /**< Number of raindeers to generate */
-  int te;     /**< Max work time of elf */
-  int tr;     /**< Max vacation time of raindeer */
-  bool pflag; /**< Extension flag for generating more elves on USR1 signal */
+  int ne;                         /**< Number of elves to generate */
+  int nr;                         /**< Number of raindeers to generate */
+  int te;                         /**< Max work time of elf */
+  int tr;                         /**< Max vacation time of raindeer */
+  bool pflag;                     /**< Extension flag for generating more elves on USR1 signal */
 } Params;
 
 #endif //IOS_PROJECT2_STATIC_CONSTRUCTIONS_H

@@ -10,6 +10,7 @@
 
 #include "lib/static_constructions.h"
 #include "lib/resource_allocation.h"
+#include "lib/shared_resources.h"
 #include "lib/error_handling.h"
 #include "lib/process_handlers.h"
 
