@@ -70,14 +70,14 @@ void handle_elf(size_t id)
     printToOutput("Elf", id, "need help");
 
     // If shop is closed go elf dont need help and can take holidays
-    if (*shopClosed) break;
+    if (sharedMemory->shopClosed) break;
 
     // Wait in queue for empty workshop
     bool leave = false;
 
-    while(sem_trywait(waitForHelp) != 0)
+    while(sem_trywait(&semHolder->waitForHelp) != 0)
     {
-      if (*shopClosed)
+      if (sharedMemory->shopClosed)
       {
         leave = true;
         break;
@@ -87,41 +87,41 @@ void handle_elf(size_t id)
     if (leave) break;
 
     // Wait for help
-    *elfReadyQueue += 1;
-    if (*elfReadyQueue == 3)
+    sharedMemory->elfReadyQueue++;
+    if (sharedMemory->elfReadyQueue == 3)
     {
-      sem_post(wakeForHelp);
+      sem_post(&semHolder->wakeForHelp);
     }
 
-    while(sem_trywait(getHelp) != 0)
+    while(sem_trywait(&semHolder->getHelp) != 0)
     {
-      if (*shopClosed)
+      if (sharedMemory->shopClosed)
       {
         leave = true;
         break;
       }
     }
 
-    *elfReadyQueue -= 1;
+    sharedMemory->elfReadyQueue--;
     if (leave) break;
 
     printToOutput("Elf", id, "get help");
 
     // Get help from Santa
-    sem_post(elfHelped);
+    sem_post(&semHolder->elfHelped);
 
     // Signal to 3 next elves that workshop is free
-    if (*elfReadyQueue == 0)
+    if (sharedMemory->elfReadyQueue == 0)
     {
-      sem_post(waitForHelp);
-      sem_post(waitForHelp);
-      sem_post(waitForHelp);
+      sem_post(&semHolder->waitForHelp);
+      sem_post(&semHolder->waitForHelp);
+      sem_post(&semHolder->waitForHelp);
     }
   }
 
   // take holidays
   printToOutput("Elf", id, "taking holidays");
-  sem_post(elfFinished);
+  sem_post(&semHolder->elfFinished);
 }
 
 /**
@@ -143,21 +143,21 @@ void handle_rd(size_t id)
   usleep(vac_time * 1000);
 
   // Wait for hitch
-  *readyRDCount += 1;
-  if (*readyRDCount == params.nr)
+  sharedMemory->readyRDCount++;
+  if (sharedMemory->readyRDCount == params.nr)
   {
-    sem_wait(santaReady);
-    sem_post(wakeForHitch);
-    sem_post(santaReady);
+    sem_wait(&semHolder->santaReady);
+    sem_post(&semHolder->wakeForHitch);
+    sem_post(&semHolder->santaReady);
   }
 
   printToOutput("RD", id, "return home");
 
-  sem_wait(rdWaitForHitch);
+  sem_wait(&semHolder->rdWaitForHitch);
 
   printToOutput("RD", id, "get hitched");
-  sem_post(rdHitched);
-  sem_post(rdFinished);
+  sem_post(&semHolder->rdHitched);
+  sem_post(&semHolder->rdFinished);
 }
 
 /**
@@ -171,44 +171,44 @@ void handle_santa()
 
   while (true)
   {
-    sem_wait(santaReady);
+    sem_wait(&semHolder->santaReady);
 
     // All RDs ready for hitching, close workshop
-    if (sem_trywait(wakeForHitch) == 0)
+    if (sem_trywait(&semHolder->wakeForHitch) == 0)
     {
-      sem_post(santaReady);
+      sem_post(&semHolder->santaReady);
       break;
     }
 
     // Santa will get woken up and will go help elfs
-    if (sem_trywait(wakeForHelp) == 0)
+    if (sem_trywait(&semHolder->wakeForHelp) == 0)
     {
       printToOutput("Santa", NO_ID, "helping elves");
 
       // Help 3 elves
       for (int i = 0; i < 3; i++)
       {
-        sem_post(getHelp);
-        sem_wait(elfHelped);
+        sem_post(&semHolder->getHelp);
+        sem_wait(&semHolder->elfHelped);
       }
 
       printToOutput("Santa", NO_ID, "going to sleep");
     }
 
-    sem_post(santaReady);
+    sem_post(&semHolder->santaReady);
   }
 
   printToOutput("Santa", NO_ID, "closing workshop");
-  *shopClosed = 1;
+  sharedMemory->shopClosed = true;
 
   for (int i = 0; i < params.nr; i++)
   {
     // Hitch all RDs
-    sem_post(rdWaitForHitch);
-    sem_wait(rdHitched);
+    sem_post(&semHolder->rdWaitForHitch);
+    sem_wait(&semHolder->rdHitched);
   }
 
   printToOutput("Santa", NO_ID, "Christmas started");
-  *christmasStarted = 1;
-  sem_post(santaFinished);
+  sharedMemory->christmasStarted = true;
+  sem_post(&semHolder->santaFinished);
 }

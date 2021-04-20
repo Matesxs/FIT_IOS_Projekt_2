@@ -8,8 +8,6 @@
 #define _GNU_SOURCE
 #include "resource_allocation.h"
 
-#define SEM_ERR (void*)-1 /**< Error return value for shared memory mapping */
-
 /**
  * @brief Create shared memory
  * 
@@ -38,11 +36,9 @@ void* createSharedMemory(size_t size, ReturnCode *retVal)
  * @param sem return pointer to pointer for semaphore
  * @param retVal pointer to return code that will be returned based on previous state and success of this action
  */
-void createSemaphore(int defVal, sem_t **sem, ReturnCode *retVal)
+void initSemaphore(int defVal, sem_t *sem, ReturnCode *retVal)
 {
-  (*sem) = createSharedMemory(sizeof(sem_t), retVal);
-
-  if (sem_init(*sem, 1, defVal) == -1)
+  if (sem_init(sem, 1, defVal) == -1)
     (*retVal) |= SEMAPHOR_INIT_FAILED;
 }
 
@@ -50,6 +46,7 @@ void createSemaphore(int defVal, sem_t **sem, ReturnCode *retVal)
  * @brief Destroy shared memory segment
  * 
  * @param memLink pointer to link of shared memory
+ * @param size size of memory to destroy
  * @param retVal pointer to return code that will be returned based on previous state and success of this action
  */
 void destroySharedMemory(void **memLink, size_t size, ReturnCode *retVal)
@@ -68,16 +65,10 @@ void destroySharedMemory(void **memLink, size_t size, ReturnCode *retVal)
  * @param sem pointer to semaphore to destroy
  * @param retVal pointer to return code that will be returned based on previous state and success of this action
  */
-void destroySemaphore(sem_t **sem, ReturnCode *retVal)
+void destroySemaphore(sem_t *sem, ReturnCode *retVal)
 {
-  if (*sem == NULL) return;
-
-  if (sem_destroy(*sem) == -1)
+  if (sem_destroy(sem) == -1)
     (*retVal) |= SEMAPHOR_DESTROY_ERROR;
-
-  destroySharedMemory((void**)sem, sizeof(sem), retVal);
-
-  *sem = NULL;
 }
 
 /**
@@ -111,25 +102,23 @@ ReturnCode deallocateResources()
   ReturnCode retVal = NO_ERROR;
 
   // Destroy semafors
-  destroySemaphore(&writeOutLock, &retVal);
-  destroySemaphore(&rdWaitForHitch, &retVal);
-  destroySemaphore(&rdHitched, &retVal);
-  destroySemaphore(&getHelp, &retVal);
-  destroySemaphore(&waitForHelp, &retVal);
-  destroySemaphore(&elfHelped, &retVal);
-  destroySemaphore(&wakeForHelp, &retVal);
-  destroySemaphore(&wakeForHitch, &retVal);
-  destroySemaphore(&santaReady, &retVal);
-  destroySemaphore(&santaFinished, &retVal);
-  destroySemaphore(&elfFinished, &retVal);
-  destroySemaphore(&rdFinished, &retVal);
+  destroySemaphore(&semHolder->writeOutLock, &retVal);
+  destroySemaphore(&semHolder->rdWaitForHitch, &retVal);
+  destroySemaphore(&semHolder->rdHitched, &retVal);
+  destroySemaphore(&semHolder->getHelp, &retVal);
+  destroySemaphore(&semHolder->waitForHelp, &retVal);
+  destroySemaphore(&semHolder->elfHelped, &retVal);
+  destroySemaphore(&semHolder->wakeForHelp, &retVal);
+  destroySemaphore(&semHolder->wakeForHitch, &retVal);
+  destroySemaphore(&semHolder->santaReady, &retVal);
+  destroySemaphore(&semHolder->santaFinished, &retVal);
+  destroySemaphore(&semHolder->elfFinished, &retVal);
+  destroySemaphore(&semHolder->rdFinished, &retVal);
+
+  destroySharedMemory((void**)&semHolder, sizeof(SemHolder), &retVal);
 
   // Destroy shared memory
-  destroySharedMemory((void**)&readyRDCount, sizeof(int), &retVal);
-  destroySharedMemory((void**)&elfReadyQueue, sizeof(int), &retVal);
-  destroySharedMemory((void**)&shopClosed, sizeof(int), &retVal);
-  destroySharedMemory((void**)&actionId, sizeof(int), &retVal);
-  destroySharedMemory((void**)&christmasStarted, sizeof(int), &retVal);
+  destroySharedMemory((void**)&sharedMemory, sizeof(SharedMemory), &retVal);
 
   if (retVal != NO_ERROR)
     return retVal;
@@ -147,36 +136,34 @@ ReturnCode allocateResources()
   ReturnCode retVal = NO_ERROR;
 
   // Create semaphores
-  createSemaphore(1, &writeOutLock, &retVal);
-  createSemaphore(0, &rdWaitForHitch, &retVal);
-  createSemaphore(0, &rdHitched, &retVal);
-  createSemaphore(0, &getHelp, &retVal);
-  createSemaphore(3, &waitForHelp, &retVal);
-  createSemaphore(0, &elfHelped, &retVal);
-  createSemaphore(0, &wakeForHelp, &retVal);
-  createSemaphore(0, &wakeForHitch, &retVal);
-  createSemaphore(1, &santaReady, &retVal);
-  createSemaphore(0, &santaFinished, &retVal);
-  createSemaphore(0, &elfFinished, &retVal);
-  createSemaphore(0, &rdFinished, &retVal);
+  semHolder = createSharedMemory(sizeof(SemHolder), &retVal);
+  if (retVal != NO_ERROR) return retVal;
+
+  initSemaphore(1, &semHolder->writeOutLock, &retVal);
+  initSemaphore(0, &semHolder->rdWaitForHitch, &retVal);
+  initSemaphore(0, &semHolder->rdHitched, &retVal);
+  initSemaphore(0, &semHolder->getHelp, &retVal);
+  initSemaphore(3, &semHolder->waitForHelp, &retVal);
+  initSemaphore(0, &semHolder->elfHelped, &retVal);
+  initSemaphore(0, &semHolder->wakeForHelp, &retVal);
+  initSemaphore(0, &semHolder->wakeForHitch, &retVal);
+  initSemaphore(1, &semHolder->santaReady, &retVal);
+  initSemaphore(0, &semHolder->santaFinished, &retVal);
+  initSemaphore(0, &semHolder->elfFinished, &retVal);
+  initSemaphore(0, &semHolder->rdFinished, &retVal);
 
   if (retVal != NO_ERROR) return retVal;
 
   // Create shared memory
-  readyRDCount = createSharedMemory(sizeof(int), &retVal);
-  elfReadyQueue = createSharedMemory(sizeof(int), &retVal);
-  shopClosed = createSharedMemory(sizeof(int), &retVal);
-  actionId = createSharedMemory(sizeof(int), &retVal);
-  christmasStarted = createSharedMemory(sizeof(int), &retVal);
-
+  sharedMemory = createSharedMemory(sizeof(SharedMemory), &retVal);
   if (retVal != NO_ERROR) return retVal;
 
   // Init shared memory
-  *readyRDCount = 0;
-  *elfReadyQueue = 0;
-  *shopClosed = 0;
-  *actionId = 1;
-  *christmasStarted = 0;
+  sharedMemory->readyRDCount = 0;
+  sharedMemory->elfReadyQueue = 0;
+  sharedMemory->shopClosed = false;
+  sharedMemory->actionId = 1;
+  sharedMemory->christmasStarted = false;
 
   return NO_ERROR;
 }

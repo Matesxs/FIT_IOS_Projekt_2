@@ -68,17 +68,17 @@ ReturnCode parseArguments(int argc, char *argv[])
  */
 void printToOutput(char *entityName, int id, char *message)
 {
-  sem_wait(writeOutLock);
+  sem_wait(&semHolder->writeOutLock);
 
   if (id < 0)
   {
-    fprintf(outputFile, "%d: %s: %s\n", *actionId, entityName, message);
+    fprintf(outputFile, "%d: %s: %s\n", sharedMemory->actionId, entityName, message);
   }
   else
   {
-    fprintf(outputFile, "%d: %s %d: %s\n", *actionId, entityName, id, message);
+    fprintf(outputFile, "%d: %s %d: %s\n", sharedMemory->actionId, entityName, id, message);
   }
 
-  *actionId += 1;
-  sem_post(writeOutLock);
+  sharedMemory->actionId++;
+  sem_post(&semHolder->writeOutLock);
 }

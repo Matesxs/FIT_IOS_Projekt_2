@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
       if (globalElvesReturncode != NO_ERROR)
         handleErrors(globalElvesReturncode);
         
-      if (*christmasStarted)
+      if (sharedMemory->christmasStarted)
         break;
     }
 
@@ -132,15 +132,15 @@ int main(int argc, char *argv[])
 
   // Wait for all processes to finish
   // Wait for Santa to finish
-  sem_wait(santaFinished);
+  sem_wait(&semHolder->santaFinished);
 
   // Wait for elves to finish
   for (size_t i = 0; i < elves_count; i++)
-    sem_wait(elfFinished);
+    sem_wait(&semHolder->elfFinished);
 
   // Wait for raindeers to finish
-  for (int i = 0; i < params.nr; i++)
-    sem_wait(rdFinished);
+  for (size_t i = 0; i < rd_count; i++)
+    sem_wait(&semHolder->rdFinished);
 
   // Clear shared resources
   handleErrors(deallocateResources());
