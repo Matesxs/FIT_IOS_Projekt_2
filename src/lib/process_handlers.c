@@ -73,18 +73,13 @@ void handle_elf(size_t id)
     if (sharedMemory->shopClosed) break;
 
     // Wait in queue for empty workshop
-    bool leave = false;
-
     while(sem_trywait(&semHolder->waitForHelp) != 0)
     {
       if (sharedMemory->shopClosed)
-      {
-        leave = true;
         break;
-      }
     }
 
-    if (leave) break;
+    if (sharedMemory->shopClosed) break;
 
     // Wait for help
     sharedMemory->elfReadyQueue++;
@@ -96,14 +91,11 @@ void handle_elf(size_t id)
     while(sem_trywait(&semHolder->getHelp) != 0)
     {
       if (sharedMemory->shopClosed)
-      {
-        leave = true;
         break;
-      }
     }
 
     sharedMemory->elfReadyQueue--;
-    if (leave) break;
+    if (sharedMemory->shopClosed) break;
 
     printToOutput("Elf", id, "get help");
 
