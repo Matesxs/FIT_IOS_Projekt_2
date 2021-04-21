@@ -132,6 +132,8 @@ int main(int argc, char *argv[])
   for (size_t i = 0; i < finalChildCount; i++)
     sem_wait(&semHolder->childFinished);
 
+  // printf("All childs finished\n");
+
   // Clear shared resources
   handleErrors(deallocateResources());
 

@@ -118,6 +118,8 @@ void handle_elf(size_t id)
   // take holidays
   printToOutput("Elf", id, "taking holidays");
   sem_post(&semHolder->childFinished);
+
+  // printf("Elf %ld finished\n", id);
 }
 
 /**
@@ -162,6 +164,8 @@ void handle_rd(size_t id)
   // Signalize was hitched
   sem_post(&semHolder->rdHitched);
   sem_post(&semHolder->childFinished);
+
+  // printf("RD %ld finished\n", id);
 }
 
 /**
@@ -192,6 +196,8 @@ void handle_santa_end()
   printToOutput("Santa", NO_ID, "Christmas started");
   sem_post(&semHolder->christmasStarted);
   sem_post(&semHolder->childFinished);
+
+  // printf("Santa finished\n");
 
   exit(0);
 }
