@@ -20,10 +20,7 @@ void addElves()
   // Reallocate elf process ids array
   pid_t *tmp = (pid_t*)realloc(processHolder.elfIds, newElvesCount * sizeof(pid_t));
   if (tmp == NULL)
-  {
-    globalElvesReturncode = PID_ALLOCATION_ERROR;
-    return;
-  }
+    handleErrors(PID_ALLOCATION_ERROR);
 
   // Replace pointer
   processHolder.elfIds = tmp;
@@ -63,6 +60,7 @@ void handle_elf(size_t id)
   srand(time(NULL) * getpid());
 
   sharedMemory->spawnedElves++;
+
   printToOutput("Elf", id, "started");
 
   while (true)
@@ -77,21 +75,23 @@ void handle_elf(size_t id)
     if (sharedMemory->shopClosed) break;
 
     // Wait in queue for empty workshop
-    sem_wait(&semHolder->waitForHelp);
+    sem_wait(&semHolder->waitInQueue);
 
     if (sharedMemory->shopClosed) break;
 
     // Wait for help
     sharedMemory->elfReadyQueue++;
-    if (sharedMemory->elfReadyQueue == 3)
+
+    if (sharedMemory->elfReadyQueue >= 3)
     {
       sem_post(&semHolder->wakeForHelp);
     }
 
     // Wait for help
-    sem_wait(&semHolder->getHelp);
+    sem_wait(&semHolder->waitForHelp);
 
     sharedMemory->elfReadyQueue--;
+
     if (sharedMemory->shopClosed) break;
 
     printToOutput("Elf", id, "get help");
@@ -102,15 +102,15 @@ void handle_elf(size_t id)
     // Signal to 3 next elves that workshop is free
     if (sharedMemory->elfReadyQueue == 0)
     {
-      sem_post(&semHolder->waitForHelp);
-      sem_post(&semHolder->waitForHelp);
-      sem_post(&semHolder->waitForHelp);
+      sem_post(&semHolder->waitInQueue);
+      sem_post(&semHolder->waitInQueue);
+      sem_post(&semHolder->waitInQueue);
     }
   }
 
   // take holidays
   printToOutput("Elf", id, "taking holidays");
-  sem_post(&semHolder->elfFinished);
+  sem_post(&semHolder->childFinished);
 }
 
 /**
@@ -131,16 +131,21 @@ void handle_rd(size_t id)
   unsigned int vac_time = (random() % ((params.tr - params.tr / 2) + 1)) + params.tr / 2;
   usleep(vac_time * 1000);
 
+  sem_wait(&semHolder->rdReadyCountMutex);
   sharedMemory->readyRDCount++;
+
   if (sharedMemory->readyRDCount == params.nr)
   {
     // Wake santa if last
     sem_wait(&semHolder->santaReady);
-    sem_post(&semHolder->wakeForHitch);
+    printToOutput("RD", id, "return home");
+    kill(processHolder.santaId, SIGUSR2);
     sem_post(&semHolder->santaReady);
   }
-
-  printToOutput("RD", id, "return home");
+  else
+    printToOutput("RD", id, "return home");
+  
+  sem_post(&semHolder->rdReadyCountMutex);
 
   // Wait for hitch
   sem_wait(&semHolder->rdWaitForHitch);
@@ -149,56 +154,23 @@ void handle_rd(size_t id)
 
   // Signalize was hitched
   sem_post(&semHolder->rdHitched);
-  sem_post(&semHolder->rdFinished);
+  sem_post(&semHolder->childFinished);
 }
 
 /**
- * @brief Handler for Santa process
- *
- * Sleep, help elves and prepare raindeers
+ * @brief Handle leaving of Santa
  */
-void handle_santa()
+void handle_santa_end()
 {
-  printToOutput("Santa", NO_ID, "going to sleep");
-
-  while (true)
-  {
-    sem_wait(&semHolder->santaReady);
-
-    // All RDs ready for hitching, close workshop
-    if (sem_trywait(&semHolder->wakeForHitch) == 0)
-    {
-      sem_post(&semHolder->santaReady);
-      break;
-    }
-
-    // Santa will get woken up and will go help elfs
-    if (sem_trywait(&semHolder->wakeForHelp) == 0)
-    {
-      printToOutput("Santa", NO_ID, "helping elves");
-
-      // Help 3 elves
-      for (int i = 0; i < 3; i++)
-      {
-        sem_post(&semHolder->getHelp);
-        sem_wait(&semHolder->elfHelped);
-      }
-
-      printToOutput("Santa", NO_ID, "going to sleep");
-    }
-
-    sem_post(&semHolder->santaReady);
-  }
-
   printToOutput("Santa", NO_ID, "closing workshop");
   sharedMemory->shopClosed = true;
 
   // Send home elves
   for (int i = 0; i < sharedMemory->spawnedElves; i++)
   {
-    sem_post(&semHolder->waitForHelp);
+    sem_post(&semHolder->waitInQueue);
     if (i < 3)
-      sem_post(&semHolder->getHelp);
+      sem_post(&semHolder->waitForHelp);
   }
 
   for (int i = 0; i < params.nr; i++)
@@ -209,6 +181,41 @@ void handle_santa()
   }
 
   printToOutput("Santa", NO_ID, "Christmas started");
-  sharedMemory->christmasStarted = true;
-  sem_post(&semHolder->santaFinished);
+  sem_post(&semHolder->christmasStarted);
+  sem_post(&semHolder->childFinished);
+
+  exit(0);
+}
+
+/**
+ * @brief Handler for Santa process
+ *
+ * Sleep, help elves and prepare raindeers
+ */
+void handle_santa()
+{
+  signal(SIGUSR2, handle_santa_end);
+
+  printToOutput("Santa", NO_ID, "going to sleep");
+  sem_post(&semHolder->santaReady);
+
+  while (true)
+  {
+    // Santa will get woken up and will go help elfs
+    sem_wait(&semHolder->wakeForHelp);
+
+    sem_wait(&semHolder->santaReady);
+    printToOutput("Santa", NO_ID, "helping elves");
+
+    // Help 3 elves
+    for (int i = 0; i < 3; i++)
+    {
+      sem_post(&semHolder->waitForHelp);
+      sem_wait(&semHolder->elfHelped);
+    }
+
+    printToOutput("Santa", NO_ID, "going to sleep");
+
+    sem_post(&semHolder->santaReady);
+  }
 }

@@ -11,12 +11,11 @@
 #include "static_constructions.h"
 
 extern SemHolder *semHolder;
-extern SharedMemory *sharedMemory;
+extern volatile SharedMemory *sharedMemory;
 
 // Mic
 extern Params params;
 extern FILE *outputFile;
 extern ProcessHolder processHolder;
-extern ReturnCode globalElvesReturncode;
 
 #endif //IOS_PROJECT2_SHARED_RESOURCES_H

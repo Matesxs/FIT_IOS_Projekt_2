@@ -51,4 +51,4 @@ clean:
 	$(RM) $(ADDITIONAL_CLEANU)
 
 zip: clean
-	zip -r $(BINARY_NAME).zip *
+	zip -r -9 $(BINARY_NAME).zip *

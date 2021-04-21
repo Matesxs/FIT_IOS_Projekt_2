@@ -116,32 +116,16 @@ int main(int argc, char *argv[])
     signal(SIGUSR1, addElves);
 
     // Wait for signals before waiting for elves
-    while (true)
-    {
-      if (globalElvesReturncode != NO_ERROR)
-        handleErrors(globalElvesReturncode);
-        
-      if (sharedMemory->christmasStarted)
-        break;
-    }
+    sem_wait(&semHolder->christmasStarted);
 
     // Remove handler for usr signal 1
     signal(SIGUSR1, SIG_IGN);
-    if (globalElvesReturncode != NO_ERROR)
-      handleErrors(globalElvesReturncode);
   }
 
   // Wait for all processes to finish
-  // Wait for Santa to finish
-  sem_wait(&semHolder->santaFinished);
-
-  // Wait for elves to finish
-  for (size_t i = 0; i < processHolder.elvesCount; i++)
-    sem_wait(&semHolder->elfFinished);
-
-  // Wait for raindeers to finish
-  for (size_t i = 0; i < processHolder.rdCount; i++)
-    sem_wait(&semHolder->rdFinished);
+  size_t finalChildCount = 1 + processHolder.elvesCount + processHolder.rdCount;
+  for (size_t i = 0; i < finalChildCount; i++)
+    sem_wait(&semHolder->childFinished);
 
   // Clear shared resources
   handleErrors(deallocateResources());

@@ -38,15 +38,14 @@ typedef struct sem_holder
   sem_t writeOutLock;             /**< Semaphore for writing to output file */
   sem_t rdWaitForHitch;           /**< Semaphore for raindeers to wait for hitch */
   sem_t rdHitched;                /**< Semaphore for indicating that raindeer was hitched */
-  sem_t getHelp;                  /**< Semaphore for elves that are on the front of queue and will get help from Santa */
-  sem_t waitForHelp;              /**< Semaphore for elves to queue when Santa is helping another 3 elves */
+  sem_t waitInQueue;              /**< Semaphore for elves to queue when Santa is helping another 3 elves */
+  sem_t waitForHelp;              /**< Semaphore for elves that are on the front of queue and will get help from Santa */
   sem_t elfHelped;                /**< Semaphore for indicating that elf get help */
   sem_t wakeForHelp;              /**< Semaphore for third elf in queue to wake up Santa for helping */
-  sem_t wakeForHitch;             /**< Semaphore for last raindeer to wake up Santa for hitching */
   sem_t santaReady;               /**< Semaphore signalizing that Santa is not doing something else and can be woken up */
-  sem_t santaFinished;            /**< Semaphore signalizing that Santa process finished */
-  sem_t elfFinished;              /**< Semaphore signalizing that elf process finished */
-  sem_t rdFinished;               /**< Semaphore signalizing that raindeer process finished */
+  sem_t childFinished;            /**< Semaphore signalizing exiting of child process */
+  sem_t rdReadyCountMutex;        /**< Mutex for handling ready raindeers */
+  sem_t christmasStarted;         /**< Semaphore signalizing that Christmas started */ 
 } SemHolder;
 
 /**
@@ -60,7 +59,6 @@ typedef struct shared_memory
   int spawnedElves;               /**< Count every spawned elf */
   bool shopClosed;                /**< Flag representing if workshop is closed */
   int actionId;                   /**< Action counter for output line indexing */
-  bool christmasStarted;          /**< Flag representing if Christmas started */
 } SharedMemory;
 
 /**

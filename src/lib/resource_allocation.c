@@ -105,15 +105,14 @@ ReturnCode deallocateResources()
   destroySemaphore(&semHolder->writeOutLock, &retVal);
   destroySemaphore(&semHolder->rdWaitForHitch, &retVal);
   destroySemaphore(&semHolder->rdHitched, &retVal);
-  destroySemaphore(&semHolder->getHelp, &retVal);
   destroySemaphore(&semHolder->waitForHelp, &retVal);
+  destroySemaphore(&semHolder->waitInQueue, &retVal);
   destroySemaphore(&semHolder->elfHelped, &retVal);
   destroySemaphore(&semHolder->wakeForHelp, &retVal);
-  destroySemaphore(&semHolder->wakeForHitch, &retVal);
   destroySemaphore(&semHolder->santaReady, &retVal);
-  destroySemaphore(&semHolder->santaFinished, &retVal);
-  destroySemaphore(&semHolder->elfFinished, &retVal);
-  destroySemaphore(&semHolder->rdFinished, &retVal);
+  destroySemaphore(&semHolder->childFinished, &retVal);
+  destroySemaphore(&semHolder->rdReadyCountMutex, &retVal);
+  destroySemaphore(&semHolder->christmasStarted, &retVal);
 
   destroySharedMemory((void**)&semHolder, sizeof(SemHolder), &retVal);
 
@@ -142,15 +141,14 @@ ReturnCode allocateResources()
   initSemaphore(1, &semHolder->writeOutLock, &retVal);
   initSemaphore(0, &semHolder->rdWaitForHitch, &retVal);
   initSemaphore(0, &semHolder->rdHitched, &retVal);
-  initSemaphore(0, &semHolder->getHelp, &retVal);
-  initSemaphore(3, &semHolder->waitForHelp, &retVal);
+  initSemaphore(0, &semHolder->waitForHelp, &retVal);
+  initSemaphore(3, &semHolder->waitInQueue, &retVal);
   initSemaphore(0, &semHolder->elfHelped, &retVal);
   initSemaphore(0, &semHolder->wakeForHelp, &retVal);
-  initSemaphore(0, &semHolder->wakeForHitch, &retVal);
-  initSemaphore(1, &semHolder->santaReady, &retVal);
-  initSemaphore(0, &semHolder->santaFinished, &retVal);
-  initSemaphore(0, &semHolder->elfFinished, &retVal);
-  initSemaphore(0, &semHolder->rdFinished, &retVal);
+  initSemaphore(0, &semHolder->santaReady, &retVal);
+  initSemaphore(0, &semHolder->childFinished, &retVal);
+  initSemaphore(1, &semHolder->rdReadyCountMutex, &retVal);
+  initSemaphore(0, &semHolder->christmasStarted, &retVal);
 
   if (retVal != NO_ERROR) return retVal;
 
@@ -164,7 +162,6 @@ ReturnCode allocateResources()
   sharedMemory->spawnedElves = 0;
   sharedMemory->shopClosed = false;
   sharedMemory->actionId = 1;
-  sharedMemory->christmasStarted = false;
 
   return NO_ERROR;
 }
