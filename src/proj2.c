@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
 
   // Create elves
   {
+    sem_wait(&semHolder->elfCounterMutex);
+
     processHolder.elfIds = (pid_t *)malloc(sizeof(pid_t) * params.ne);
     if (processHolder.elfIds == NULL)
     {
@@ -78,8 +80,11 @@ int main(int argc, char *argv[])
       else
       {
         processHolder.elfIds[i] = tmp_proc;
+        sharedMemory->spawnedElves++;
       }
     }
+
+    sem_post(&semHolder->elfCounterMutex);
   }
 
   // Create raindeers

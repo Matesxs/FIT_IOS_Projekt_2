@@ -45,6 +45,8 @@ typedef struct sem_holder
   sem_t santaReady;               /**< Semaphore signalizing that Santa is not doing something else and can be woken up */
   sem_t childFinished;            /**< Semaphore signalizing exiting of child process */
   sem_t rdReadyCountMutex;        /**< Mutex for handling ready raindeers */
+  sem_t elfCounterMutex;          /**< Mutex for spawned elves counter */
+  sem_t elfQueueMutex;            /**< Mutex for managing elf queue */
   sem_t christmasStarted;         /**< Semaphore signalizing that Christmas started */ 
 } SemHolder;
 

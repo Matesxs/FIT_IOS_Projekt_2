@@ -14,6 +14,8 @@
  */
 void addElves()
 {
+  sem_wait(&semHolder->elfCounterMutex);
+
   // Generate new size of elf process ids array
   size_t newElvesCount = processHolder.elvesCount + (random() % params.ne) + 1;
 
@@ -43,8 +45,11 @@ void addElves()
     {
       processHolder.elfIds[i] = tmp_proc;
       processHolder.elvesCount++;
+      sharedMemory->spawnedElves++;
     }
   }
+
+  sem_post(&semHolder->elfCounterMutex);
 }
 
 /**
@@ -58,8 +63,6 @@ void handle_elf(size_t id)
 {
   // Init random generator
   srand(time(NULL) * getpid());
-
-  sharedMemory->spawnedElves++;
 
   printToOutput("Elf", id, "started");
 
@@ -80,17 +83,21 @@ void handle_elf(size_t id)
     if (sharedMemory->shopClosed) break;
 
     // Wait for help
+    sem_wait(&semHolder->elfQueueMutex);
     sharedMemory->elfReadyQueue++;
 
     if (sharedMemory->elfReadyQueue >= 3)
     {
       sem_post(&semHolder->wakeForHelp);
     }
+    sem_post(&semHolder->elfQueueMutex);
 
     // Wait for help
     sem_wait(&semHolder->waitForHelp);
 
+    sem_wait(&semHolder->elfQueueMutex);
     sharedMemory->elfReadyQueue--;
+    sem_post(&semHolder->elfQueueMutex);
 
     if (sharedMemory->shopClosed) break;
 
@@ -166,12 +173,14 @@ void handle_santa_end()
   sharedMemory->shopClosed = true;
 
   // Send home elves
+  sem_wait(&semHolder->elfCounterMutex);
   for (int i = 0; i < sharedMemory->spawnedElves; i++)
   {
     sem_post(&semHolder->waitInQueue);
     if (i < 3)
       sem_post(&semHolder->waitForHelp);
   }
+  sem_post(&semHolder->elfCounterMutex);
 
   for (int i = 0; i < params.nr; i++)
   {

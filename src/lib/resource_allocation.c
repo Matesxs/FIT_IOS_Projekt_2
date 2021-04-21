@@ -112,6 +112,8 @@ ReturnCode deallocateResources()
   destroySemaphore(&semHolder->santaReady, &retVal);
   destroySemaphore(&semHolder->childFinished, &retVal);
   destroySemaphore(&semHolder->rdReadyCountMutex, &retVal);
+  destroySemaphore(&semHolder->elfCounterMutex, &retVal);
+  destroySemaphore(&semHolder->elfQueueMutex, &retVal);
   destroySemaphore(&semHolder->christmasStarted, &retVal);
 
   destroySharedMemory((void**)&semHolder, sizeof(SemHolder), &retVal);
@@ -148,6 +150,8 @@ ReturnCode allocateResources()
   initSemaphore(0, &semHolder->santaReady, &retVal);
   initSemaphore(0, &semHolder->childFinished, &retVal);
   initSemaphore(1, &semHolder->rdReadyCountMutex, &retVal);
+  initSemaphore(1, &semHolder->elfCounterMutex, &retVal);
+  initSemaphore(1, &semHolder->elfQueueMutex, &retVal);
   initSemaphore(0, &semHolder->christmasStarted, &retVal);
 
   if (retVal != NO_ERROR) return retVal;
