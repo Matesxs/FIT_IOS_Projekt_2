@@ -161,6 +161,7 @@ ReturnCode allocateResources()
   // Init shared memory
   sharedMemory->readyRDCount = 0;
   sharedMemory->elfReadyQueue = 0;
+  sharedMemory->spawnedElves = 0;
   sharedMemory->shopClosed = false;
   sharedMemory->actionId = 1;
   sharedMemory->christmasStarted = false;

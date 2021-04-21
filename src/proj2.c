@@ -146,5 +146,5 @@ int main(int argc, char *argv[])
   // Clear shared resources
   handleErrors(deallocateResources());
 
-  return NO_ERROR;
+  return 0;
 }

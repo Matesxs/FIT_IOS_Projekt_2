@@ -57,6 +57,7 @@ typedef struct shared_memory
 {
   int readyRDCount;               /**< Counter for raindeers that returned from vacation */
   int elfReadyQueue;              /**< Counter for elves ready to get help */
+  int spawnedElves;               /**< Count every spawned elf */
   bool shopClosed;                /**< Flag representing if workshop is closed */
   int actionId;                   /**< Action counter for output line indexing */
   bool christmasStarted;          /**< Flag representing if Christmas started */

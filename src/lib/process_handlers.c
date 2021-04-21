@@ -14,8 +14,10 @@
  */
 void addElves()
 {
+  // Generate new size of elf process ids array
   size_t newElvesCount = processHolder.elvesCount + (random() % params.ne) + 1;
 
+  // Reallocate elf process ids array
   pid_t *tmp = (pid_t*)realloc(processHolder.elfIds, newElvesCount * sizeof(pid_t));
   if (tmp == NULL)
   {
@@ -23,8 +25,10 @@ void addElves()
     return;
   }
 
+  // Replace pointer
   processHolder.elfIds = tmp;
 
+  // Generate new elves
   for (size_t i = processHolder.elvesCount; i < newElvesCount; i++)
   {
     pid_t tmp_proc = fork();
@@ -41,10 +45,9 @@ void addElves()
     else
     {
       processHolder.elfIds[i] = tmp_proc;
+      processHolder.elvesCount++;
     }
   }
-
-  processHolder.elvesCount = newElvesCount;
 }
 
 /**
@@ -59,6 +62,7 @@ void handle_elf(size_t id)
   // Init random generator
   srand(time(NULL) * getpid());
 
+  sharedMemory->spawnedElves++;
   printToOutput("Elf", id, "started");
 
   while (true)
@@ -73,11 +77,7 @@ void handle_elf(size_t id)
     if (sharedMemory->shopClosed) break;
 
     // Wait in queue for empty workshop
-    while(sem_trywait(&semHolder->waitForHelp) != 0)
-    {
-      if (sharedMemory->shopClosed)
-        break;
-    }
+    sem_wait(&semHolder->waitForHelp);
 
     if (sharedMemory->shopClosed) break;
 
@@ -88,11 +88,8 @@ void handle_elf(size_t id)
       sem_post(&semHolder->wakeForHelp);
     }
 
-    while(sem_trywait(&semHolder->getHelp) != 0)
-    {
-      if (sharedMemory->shopClosed)
-        break;
-    }
+    // Wait for help
+    sem_wait(&semHolder->getHelp);
 
     sharedMemory->elfReadyQueue--;
     if (sharedMemory->shopClosed) break;
@@ -134,10 +131,10 @@ void handle_rd(size_t id)
   unsigned int vac_time = (random() % ((params.tr - params.tr / 2) + 1)) + params.tr / 2;
   usleep(vac_time * 1000);
 
-  // Wait for hitch
   sharedMemory->readyRDCount++;
   if (sharedMemory->readyRDCount == params.nr)
   {
+    // Wake santa if last
     sem_wait(&semHolder->santaReady);
     sem_post(&semHolder->wakeForHitch);
     sem_post(&semHolder->santaReady);
@@ -145,9 +142,12 @@ void handle_rd(size_t id)
 
   printToOutput("RD", id, "return home");
 
+  // Wait for hitch
   sem_wait(&semHolder->rdWaitForHitch);
 
   printToOutput("RD", id, "get hitched");
+
+  // Signalize was hitched
   sem_post(&semHolder->rdHitched);
   sem_post(&semHolder->rdFinished);
 }
@@ -192,6 +192,14 @@ void handle_santa()
 
   printToOutput("Santa", NO_ID, "closing workshop");
   sharedMemory->shopClosed = true;
+
+  // Send home elves
+  for (int i = 0; i < sharedMemory->spawnedElves; i++)
+  {
+    sem_post(&semHolder->waitForHelp);
+    if (i < 3)
+      sem_post(&semHolder->getHelp);
+  }
 
   for (int i = 0; i < params.nr; i++)
   {
