@@ -55,14 +55,17 @@ int main(int argc, char *argv[])
 
   // Create elves
   {
-    sem_wait(&semHolder->elfCounterMutex);
-
+    sem_wait(&semHolder->numOfElvesStable);
+    
     processHolder.elfIds = (pid_t *)malloc(sizeof(pid_t) * params.ne);
     if (processHolder.elfIds == NULL)
     {
       handleErrors(PROCESS_CREATE_ERROR);
     }
     processHolder.elvesCount = params.ne;
+
+    sharedMemory->numberOfElves = processHolder.elvesCount;
+    sem_post(&semHolder->numOfElvesStable);
 
     for (size_t i = 0; i < processHolder.elvesCount; i++)
     {
@@ -78,13 +81,8 @@ int main(int argc, char *argv[])
         exit(0);
       }
       else
-      {
         processHolder.elfIds[i] = tmp_proc;
-        sharedMemory->spawnedElves++;
-      }
     }
-
-    sem_post(&semHolder->elfCounterMutex);
   }
 
   // Create raindeers
