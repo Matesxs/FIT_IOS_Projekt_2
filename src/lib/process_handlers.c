@@ -124,9 +124,9 @@ void handle_elf(size_t id)
 /**
  * @brief Handler for reindeer processes
  *
- * Wait for all raindeers to return and wakeup Santa
+ * Wait for all reindeers to return and wakeup Santa
  *
- * @param id id of raindeer
+ * @param id id of reindeer
  */
 void handle_rd(size_t id)
 {
@@ -203,7 +203,7 @@ void handle_santa_end()
 /**
  * @brief Handler for Santa process
  *
- * Sleep, help elves and prepare raindeers
+ * Sleep, help elves and prepare reindeers
  */
 void handle_santa()
 {

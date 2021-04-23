@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  // Create raindeers
+  // Create reindeers
   {
     processHolder.rdIds = (pid_t *)malloc(sizeof(pid_t) * params.nr);
     if (processHolder.rdIds == NULL)

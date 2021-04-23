@@ -23,8 +23,8 @@ typedef struct process_holder
   pid_t *elfIds;                  /**< Array of process ids for all elves */
   size_t elvesCount;              /**< Length of elf ids array */
 
-  pid_t *rdIds;                   /**< Array of process ids for all raindeers */
-  size_t rdCount;                 /**< Length of raindeer ids array */
+  pid_t *rdIds;                   /**< Array of process ids for all reindeers */
+  size_t rdCount;                 /**< Length of reindeer ids array */
 
   pid_t santaId;                  /**< Process id of Santa process */
 } ProcessHolder;
@@ -36,15 +36,15 @@ typedef struct process_holder
 typedef struct sem_holder
 {
   sem_t writeOutLock;             /**< Semaphore for writing to output file */
-  sem_t rdWaitForHitch;           /**< Semaphore for raindeers to wait for hitch */
-  sem_t rdHitched;                /**< Semaphore for indicating that raindeer was hitched */
+  sem_t rdWaitForHitch;           /**< Semaphore for reindeers to wait for hitch */
+  sem_t rdHitched;                /**< Semaphore for indicating that reindeer was hitched */
   sem_t waitInQueue;              /**< Semaphore for elves to queue when Santa is helping another 3 elves */
   sem_t waitForHelp;              /**< Semaphore for elves that are on the front of queue and will get help from Santa */
   sem_t elfHelped;                /**< Semaphore for indicating that elf get help */
   sem_t wakeForHelp;              /**< Semaphore for third elf in queue to wake up Santa for helping */
   sem_t santaReady;               /**< Semaphore signalizing that Santa is not doing something else and can be woken up */
   sem_t childFinished;            /**< Semaphore signalizing exiting of child process */
-  sem_t rdReadyCountMutex;        /**< Mutex for handling ready raindeers */
+  sem_t rdReadyCountMutex;        /**< Mutex for handling ready reindeers */
   sem_t elfQueueMutex;            /**< Mutex for managing elf queue */
   sem_t christmasStarted;         /**< Semaphore signalizing that Christmas started */
   sem_t numOfElvesStable;         /**< Semaphore to signalize that number of elves will not change */
@@ -56,7 +56,7 @@ typedef struct sem_holder
  */
 typedef struct shared_memory
 {
-  int readyRDCount;               /**< Counter for raindeers that returned from vacation */
+  int readyRDCount;               /**< Counter for reindeers that returned from vacation */
   int elfReadyQueue;              /**< Counter for elves ready to get help */
   size_t numberOfElves;           /**< Mirror of allocated elves (security reasons) */
   bool shopClosed;                /**< Flag representing if workshop is closed */
@@ -88,9 +88,9 @@ typedef enum returnCode
 typedef struct prmtrs
 {
   int ne;                         /**< Number of elves to generate */
-  int nr;                         /**< Number of raindeers to generate */
+  int nr;                         /**< Number of reindeers to generate */
   int te;                         /**< Max work time of elf */
-  int tr;                         /**< Max vacation time of raindeer */
+  int tr;                         /**< Max vacation time of reindeer */
   bool pflag;                     /**< Extension flag for generating more elves on USR1 signal */
 } Params;
 
