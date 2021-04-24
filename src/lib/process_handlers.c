@@ -14,8 +14,6 @@
  */
 void addElves()
 {
-  sem_wait(&semHolder->numOfElvesStable);
-
   // Generate new size of elf process ids array
   size_t oldElvesCount = processHolder.elvesCount;
   size_t newElvesCount = oldElvesCount + (random() % params.ne) + 1;
@@ -30,7 +28,6 @@ void addElves()
   processHolder.elvesCount = newElvesCount;
   
   sharedMemory->numberOfElves = processHolder.elvesCount;
-  sem_post(&semHolder->numOfElvesStable);
 
   // Generate new elves
   for (size_t i = oldElvesCount; i < newElvesCount; i++)
@@ -175,15 +172,6 @@ void handle_santa_end()
   printToOutput("Santa", NO_ID, "closing workshop");
   sharedMemory->shopClosed = true;
 
-  // Send home elves
-  sem_wait(&semHolder->numOfElvesStable);
-  for (size_t i = 0; i < sharedMemory->numberOfElves; i++)
-  {
-    sem_post(&semHolder->waitInQueue);
-    sem_post(&semHolder->waitForHelp);
-  }
-  sem_post(&semHolder->numOfElvesStable);
-
   for (int i = 0; i < params.nr; i++)
   {
     // Hitch all RDs
@@ -193,6 +181,16 @@ void handle_santa_end()
 
   printToOutput("Santa", NO_ID, "Christmas started");
   sem_post(&semHolder->christmasStarted);
+
+  // Send home elves
+  sem_wait(&semHolder->numOfElvesStable);
+  for (size_t i = 0; i < sharedMemory->numberOfElves; i++)
+  {
+    sem_post(&semHolder->waitInQueue);
+    sem_post(&semHolder->waitForHelp);
+  }
+  sem_post(&semHolder->numOfElvesStable);
+
   sem_post(&semHolder->childFinished);
 
   // printf("Santa finished\n");

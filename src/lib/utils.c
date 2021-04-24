@@ -16,6 +16,7 @@ void initSignals()
   signal(SIGINT, terminate);
   signal(SIGTERM, terminate);
   signal(SIGUSR1, SIG_IGN);
+  signal(SIGUSR2, SIG_IGN);
 }
 
 /**

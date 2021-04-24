@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
   initSignals();
   processHolder.mainId = getpid();
 
+  // Init random generator
+  srand(time(NULL) * processHolder.mainId);
+
   // Load arguments
   handleErrors(parseArguments(argc, argv));
 
@@ -115,6 +118,8 @@ int main(int argc, char *argv[])
   // If there is pflag
   if (params.pflag)
   {
+    sem_wait(&semHolder->numOfElvesStable);
+
     // Add handler for usr signal 1
     signal(SIGUSR1, addElves);
 
@@ -123,6 +128,8 @@ int main(int argc, char *argv[])
 
     // Remove handler for usr signal 1
     signal(SIGUSR1, SIG_IGN);
+
+    sem_post(&semHolder->numOfElvesStable);
   }
 
   // Wait for all processes to finish
