@@ -199,6 +199,20 @@ void handle_santa_end()
 }
 
 /**
+ * @brief Help elves
+ * 
+ * @param number number of elves to help
+ */
+void help_elves(size_t number)
+{
+  for(size_t i = 0; i < number; i++)
+    sem_post(&semHolder->waitForHelp);
+
+  for(size_t i = 0; i < number; i++)
+    sem_wait(&semHolder->elfHelped);
+}
+
+/**
  * @brief Handler for Santa process
  *
  * Sleep, help elves and prepare reindeers
@@ -218,12 +232,7 @@ void handle_santa()
     sem_wait(&semHolder->santaReady);
     printToOutput("Santa", NO_ID, "helping elves");
 
-    // Help 3 elves
-    for (int i = 0; i < 3; i++)
-    {
-      sem_post(&semHolder->waitForHelp);
-      sem_wait(&semHolder->elfHelped);
-    }
+    help_elves(3);
 
     printToOutput("Santa", NO_ID, "going to sleep");
 
