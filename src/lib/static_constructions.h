@@ -18,7 +18,7 @@
  */
 typedef struct process_holder
 {
-  pid_t mainId;                   /**< Process id of main process */
+  pid_t mainId;                   /**< Process id of main process (available for all child processes) */
   
   pid_t *elfIds;                  /**< Array of process ids for all elves */
   size_t elvesCount;              /**< Length of elf ids array */
