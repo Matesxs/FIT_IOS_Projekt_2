@@ -34,7 +34,7 @@ $(OBJECT_FOLDER)/%.o: %.$(SUFFIX) $(HDR)
 	@mkdir -p $(@D)
 	@$(CC)  $< -c -o $@ $(CFLAGS)
 
-.PHONY:  all build run clean zip
+.PHONY:  all build run clean zip docs
 .SILENT: docs clean zip
 
 all: docs build

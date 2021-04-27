@@ -20,7 +20,7 @@ void* createSharedMemory(size_t size, ReturnCode *retVal)
 {
   void *mem = NULL;
 
-  if ((mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0)) == MAP_FAILED)
+  if ((mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0)) == MAP_FAILED)
   {
     (*retVal) |= SM_CREATE_ERROR;
     return NULL;
