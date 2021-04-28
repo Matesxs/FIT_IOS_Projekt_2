@@ -8,7 +8,7 @@
 #include "utils.h"
 
 /**
- * @brief Initialize pandlers for signals
+ * @brief Initialize handlers for signals
  */
 void initSignals()
 {

@@ -14,6 +14,9 @@
  */
 void addElves()
 {
+  signal(SIGQUIT, SIG_IGN);
+  signal(SIGUSR1, SIG_IGN);
+
   // Generate new size of elf process ids array
   size_t oldElvesCount = processHolder.elvesCount;
   size_t newElvesCount = oldElvesCount + (random() % params.ne) + 1;
@@ -26,6 +29,8 @@ void addElves()
   // Replace pointer
   processHolder.elfIds = tmp;
   processHolder.elvesCount = newElvesCount;
+
+  signal(SIGQUIT, terminate);
   
   sharedMemory->numberOfElves = processHolder.elvesCount;
 
@@ -46,6 +51,8 @@ void addElves()
     else
       processHolder.elfIds[i] = tmp_proc;
   }
+
+  signal(SIGUSR1, addElves);
 }
 
 /**
