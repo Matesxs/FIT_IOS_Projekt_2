@@ -91,7 +91,7 @@ typedef struct prmtrs
   int nr;                         /**< Number of reindeers to generate */
   int te;                         /**< Max work time of elf */
   int tr;                         /**< Max vacation time of reindeer */
-  bool pflag;                     /**< Extension flag for generating more elves on USR1 signal */
+  bool bflag;                     /**< Extension flag for generating more elves on USR1 signal */
 } Params;
 
 #endif //IOS_PROJECT2_STATIC_CONSTRUCTIONS_H

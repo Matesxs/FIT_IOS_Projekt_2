@@ -12,6 +12,6 @@ ProcessHolder processHolder = { 0 };            /**< Holder for all information 
 Params params;                                  /**< Holder for parsed arguments */
 
 SemHolder *semHolder = NULL;                    /**< Pointer to shared holder for semaphores */
-volatile SharedMemory *sharedMemory = NULL;              /**< Pointer to shared memory holder */
+volatile SharedMemory *sharedMemory = NULL;     /**< Pointer to shared memory holder */
 
 FILE *outputFile = NULL;                        /**< Output stream pointer */

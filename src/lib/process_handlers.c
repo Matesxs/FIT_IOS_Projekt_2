@@ -21,6 +21,8 @@ void addElves()
   size_t oldElvesCount = processHolder.elvesCount;
   size_t newElvesCount = oldElvesCount + (random() % params.ne) + 1;
 
+  // printf("Adding %ld new elves\n", newElvesCount - oldElvesCount);
+
   // Reallocate elf process ids array
   pid_t *tmp = (pid_t*)realloc(processHolder.elfIds, newElvesCount * sizeof(pid_t));
   if (tmp == NULL)

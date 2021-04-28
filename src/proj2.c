@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
   }
 
   // If there is pflag
-  if (params.pflag)
+  if (params.bflag)
   {
     sem_wait(&semHolder->numOfElvesStable);
 

@@ -36,8 +36,8 @@ ReturnCode parseArguments(int argc, char *argv[])
     if (argc == 6)
     {
       startIndex += 1;
-      if (strcmp(argv[1], "-p") != 0) return INVALID_ARGUMENT_ERROR;
-      params.pflag = true;
+      if (strcmp(argv[1], "-b") != 0) return INVALID_ARGUMENT_ERROR;
+      params.bflag = true;
     }
 
     params.ne = (int)strtol(argv[startIndex], &rest, 10);
