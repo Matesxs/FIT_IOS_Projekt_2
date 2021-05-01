@@ -8,7 +8,7 @@ CC=gcc
 CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -lpthread
 SUFFIX=c
 
-ADDITIONAL_CLEANU=proj2.out docs
+ADDITIONAL_CLEANU=proj2.out docs .vscode
 RM=rm -rf
 
 BINARY_PATH=$(OUTPUT_FOLDER)/$(BINARY_NAME)

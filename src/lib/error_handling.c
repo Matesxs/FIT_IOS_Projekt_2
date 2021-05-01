@@ -7,6 +7,8 @@
 
 #include "error_handling.h"
 
+bool notified = false;
+
 /**
  * @brief Deallocate all used memory, kill processes and exit
  */
@@ -33,8 +35,9 @@ void terminate()
 
     deallocateResources();
   }
-  else
+  else if (!notified)
   {
+    notified = true;
     kill(processHolder.mainId, SIGQUIT);
   }
 
