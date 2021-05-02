@@ -112,12 +112,14 @@ void handle_elf(size_t id)
     sem_post(&semHolder->elfHelped);
 
     // Signal to 3 next elves that workshop is free
+    sem_wait(&semHolder->elfQueueMutex);
     if (sharedMemory->elfReadyQueue == 0)
     {
       sem_post(&semHolder->waitInQueue);
       sem_post(&semHolder->waitInQueue);
       sem_post(&semHolder->waitInQueue);
     }
+    sem_post(&semHolder->elfQueueMutex);
   }
 
   // take holidays
