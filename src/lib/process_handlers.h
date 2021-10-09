@@ -1,6 +1,9 @@
-//
-// Created by matesxs on 4/11/21.
-//
+/**
+ * @file process_handlers.h
+ * @author Martin Douša
+ * @date April 2021
+ * @brief Definitions for worker functions
+ */
 
 #ifndef IOS_PROJECT2_PROCESS_HANDLERS_H
 #define IOS_PROJECT2_PROCESS_HANDLERS_H

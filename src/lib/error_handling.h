@@ -1,6 +1,9 @@
-//
-// Created by matesxs on 4/9/21.
-//
+/**
+ * @file error_handling.h
+ * @author Martin Douša
+ * @date April 2021
+ * @brief Definitions for handling errors
+ */
 
 #ifndef IOS_PROJECT2_ERROR_HANDLING_H
 #define IOS_PROJECT2_ERROR_HANDLING_H

@@ -1,3 +1,10 @@
+/**
+ * @file utils.h
+ * @author Martin Douša
+ * @date April 2021
+ * @brief Holds definitions for utility functions
+ */
+
 #pragma once
 
 #include <signal.h>

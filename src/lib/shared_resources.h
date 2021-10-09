@@ -1,6 +1,9 @@
-//
-// Created by matesxs on 4/9/21.
-//
+/**
+ * @file shared_resources.h
+ * @author Martin Douša
+ * @date April 2021
+ * @brief Holds definitions shared global variables and structures
+ */
 
 #ifndef IOS_PROJECT2_SHARED_RESOURCES_H
 #define IOS_PROJECT2_SHARED_RESOURCES_H

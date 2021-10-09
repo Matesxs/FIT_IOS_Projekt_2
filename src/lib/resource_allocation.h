@@ -1,6 +1,9 @@
-//
-// Created by matesxs on 4/9/21.
-//
+/**
+ * @file resource_allocation.h
+ * @author Martin Douša
+ * @date April 2021
+ * @brief Definitions for resource allocation
+ */
 
 #ifndef IOS_PROJECT2_RESOURCE_ALLOCATION_H
 #define IOS_PROJECT2_RESOURCE_ALLOCATION_H
